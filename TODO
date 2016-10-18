@@ -1,0 +1,27 @@
+======================================
+REQUIREMENTS FOR INITIAL, BETA RELEASE
+======================================
+
+incorporate suitable subs from all my p6 programs
+
+make tests for all subs; tests must use plan N
+
+all subs must have the standard comments for subs for docs
+
+incorporate useful progs
+
+all progs must have the standard comments for progs for docs
+
+use Perl 6 built-in routines :base(str) and base(str) to simplify
+  number base conversions
+
+make length args to base conversions named params
+
+add named param for upper case to base conversions
+
+
+------------------------------------------
+DONE:
+------------------------------------------
+
+transfer utility subs (and tests) in from Net::IP::Lite (DONE)

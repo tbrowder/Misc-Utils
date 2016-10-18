@@ -1,7 +1,45 @@
 # Misc::Utils
 
-Being a lazy programmer, I refactor chunks of code I find useful into a module.
+[![Build Status](https://travis-ci.org/tbrowder/Misc-Utils-Perl6.svg?branch=master)]
+  (https://travis-ci.org/tbrowder/Misc-Utils-Perl6)
 
-Here is a collection of Perl 6 subroutines I have written during my coding adventures using Perl 5's new little sister.
+Being a lazy programmer, I refactor chunks of code I find useful into
+a module; whence comes this collection of Perl 6 subroutines I have
+written during my coding adventures using Perl 5's new little sister.
 
+This module also includes various utility programs in the bin
+directory, along with examples in the examples directory.
 
+## Status
+
+This version is 1.0.0 which is considered usable, but the APIs are
+subject to change in which case the version major number will be
+updated. Note that newl added subroutines or application programs are
+not considered a change in API.
+
+## Debugging
+
+For debugging, use one the following methods:
+
+- set the module's $DEBUG variable:
+
+```Perl6
+$Misc::Utils::DEBUG = True;
+```
+
+- set the environment variable:
+
+```Perl6
+MISC_UTILS_DEBUG=1
+```
+
+## Subroutines Exported by Default
+
+```Perl6
+use Net::IP::Lite;
+```
+
+See
+[DEFAULT-SUBS](https://github.com/tbrowder/Misc-Utils-Perl6/blob/master/docs/DEFAULT-SUBS.md)
+for a list of default-exported subroutines, each with a short
+description along with its complete signature.
