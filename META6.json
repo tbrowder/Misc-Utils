@@ -1,17 +1,17 @@
 {
     "perl"        : "6.c",
-    "name"        : "Net::IP::Lite",
+    "name"        : "Misc::Utils",
     "version"     : "0.1.0",
-    "description" : "Provides utility functions for dealing with IPv4 and IPv6 addresses.",
-    "authors"     : [ "Tom Browder <tom.browder@gmail.com>" ],
+    "description" : "Provides miscellaneous utility functions and programs.",
+    "authors"     : [ "github:tbrowder" ],
     "license"     : "Artistic 2.0",
-    "source-url"  : "https://github.com/tbrowder/Net-IP-Lite-Perl6/archive/0.1.1.tar.gz",
+    "source-url"  : "https://github.com/tbrowder/Misc-Utils-Perl6/archive/0.1.0.tar.gz",
     "support"     : {
-        "bugtracker" : "https://github.com/tbrowder/Net-IP-Lite-Perl6/issues",
-        "source"     : "https://github.com/tbrowder/Net-IP-Lite-Perl6"
+        "bugtracker" : "https://github.com/tbrowder/Misc-Utils-Perl6/issues",
+        "source"     : "https://github.com/tbrowder/Misc-Utils-Perl6"
     },
     "provides"    : {
-        "Net::IP::Lite" : "lib/Net/IP/Lite.pm6"
+        "Misc-Utils-Perl6" : "lib/Misc/Utils.pm6"
     },
     "test-depends"     : [
 	"Test::META"
@@ -19,6 +19,6 @@
     "resources" : [
     ],
     "tags" : [
-	"Net", "IP", "IP address", "IPv4", "IPv6"
+	"miscellaneous", "utility programs", "utility subroutines"
     ]
 }

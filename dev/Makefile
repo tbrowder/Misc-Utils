@@ -1,6 +1,12 @@
-PROG = create-md.p6
-MFIL = ../lib/Net/IP/Lite.pm6
+PROG = ../bin/create-md.p6
+MFIL = ../lib/Misc/Utils.pm6
 TDIR = ../docs
+PDIR = ../bin
 
-create:
+create: subs progs
+
+subs:
+	$(PROG) -m $(MFIL) -d $(TDIR)
+
+progs:
 	$(PROG) -m $(MFIL) -d $(TDIR)

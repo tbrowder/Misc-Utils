@@ -14,6 +14,12 @@ BEGIN {
     }
 }
 
+# define tokens for common regexes
+my token binary           { ^ <[01]>+ $ }
+my token decimal          { ^ \d+ $ }              # actually an int
+my token hexadecimal      { :i ^ <[a..f\d]>+ $ }   # multiple chars
+my token hexadecimalchar  { :i ^ <[a..f\d]> $ }    # single char
+
 #------------------------------------------------------------------------------
 # Subroutine count-substrs
 # Purpose : Count instances of a substring in a string

@@ -12,9 +12,9 @@ directory, along with examples in the examples directory.
 
 ## Status
 
-This version is 1.0.0 which is considered usable, but the APIs are
+This version is 0.1.0 which is considered usable, but the APIs are
 subject to change in which case the version major number will be
-updated. Note that newl added subroutines or application programs are
+updated. Note that newly added subroutines or application programs are
 not considered a change in API.
 
 ## Debugging
@@ -43,3 +43,10 @@ See
 [DEFAULT-SUBS](https://github.com/tbrowder/Misc-Utils-Perl6/blob/master/docs/DEFAULT-SUBS.md)
 for a list of default-exported subroutines, each with a short
 description along with its complete signature.
+
+## Utility Programs
+
+See
+[UTIL-PROGS](https://github.com/tbrowder/Misc-Utils-Perl6/blob/master/docs/UTIL-PROGS.md)
+for a list of utility programs, each with a short
+description along with its help output.

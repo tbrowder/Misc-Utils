@@ -41,9 +41,9 @@ doc: docs
 docs: md pdf
 
 pdf: md
-	    pandoc Net-IP-Lite.md --latex-engine=pdflatex -o Net-IP-Lite.pdf
+	    pandoc Misc-Utils.md --latex-engine=pdflatex -o Misc-Utils.pdf
 	    pandoc README-0.md --latex-engine=pdflatex -o README-0.pdf
 
 md:
-	    perl6 --doc=Markdown lib/Net/IP/Lite.pm6 > Net-IP-Lite.md
+	    perl6 --doc=Markdown lib/Misc/Utils.pm6 > Misc-Utils.md
 	    perl6 --doc=Markdown README.pod6 > README-0.md
