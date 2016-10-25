@@ -1,7 +1,7 @@
 unit module Misc::Utils:auth<github:tbrowder>;
 
-# file: DEFAULT-SUBS.md
-# title: Subroutines Exported by Default
+# file:  ALL-SUBS.md
+# title: Subroutines Exported by the `:ALL` Tag
 
 # export a debug var for users
 our $DEBUG = False;
@@ -25,7 +25,7 @@ my token hexadecimalchar  { :i ^ <[a..f\d]> $ }    # single char
 # Purpose : Count instances of a substring in a string
 # Params  : String, Substring
 # Returns : Number of substrings found
-sub count-substrs(Str:D $ip, Str:D $substr) returns UInt is export {
+sub count-substrs(Str:D $ip, Str:D $substr) returns UInt is export(:count-substrs) {
     my $nsubstrs = 0;
     my $idx = index $ip, $substr;
     while $idx.defined {
@@ -42,7 +42,7 @@ sub count-substrs(Str:D $ip, Str:D $substr) returns UInt is export {
 # Purpose : Convert a single hexadecimal character to a binary string
 # Params  : Hexadecimal character
 # Returns : Binary string
-sub hexchar2bin(Str:D $hexchar where &hexadecimalchar) is export {
+sub hexchar2bin(Str:D $hexchar where &hexadecimalchar) is export(:hexchar2bin) {
     my $decimal = hexchar2dec($hexchar);
     return sprintf "%04b", $decimal;
 } # hexchar2bin
@@ -52,7 +52,7 @@ sub hexchar2bin(Str:D $hexchar where &hexadecimalchar) is export {
 # Purpose : Convert a single hexadecimal character to a decimal number
 # Params  : Hexadecimal character
 # Returns : Decimal number
-sub hexchar2dec(Str:D $hexchar is copy where &hexadecimalchar) returns UInt is export {
+sub hexchar2dec(Str:D $hexchar is copy where &hexadecimalchar) returns UInt is export(:hexchar2dec) {
     my UInt $num;
 
     $hexchar .= lc;
@@ -91,7 +91,7 @@ sub hexchar2dec(Str:D $hexchar is copy where &hexadecimalchar) returns UInt is e
 # Purpose : Convert a positive hexadecimal number (string) to a decimal number
 # Params  : Hexadecimal number (string), desired length (optional)
 # Returns : Decimal number (or string)
-sub hex2dec(Str:D $hex where &hexadecimal, UInt $len = 0) returns Cool is export {
+sub hex2dec(Str:D $hex where &hexadecimal, UInt $len = 0) returns Cool is export(:hex2dec) {
     my @chars = $hex.comb;
     @chars .= reverse;
     my UInt $decimal = 0;
@@ -111,7 +111,7 @@ sub hex2dec(Str:D $hex where &hexadecimal, UInt $len = 0) returns Cool is export
 # Purpose : Convert a positive hexadecimal number (string) to a binary string
 # Params  : Hexadecimal number (string), desired length (optional)
 # Returns : Binary number (string)
-sub hex2bin(Str:D $hex where &hexadecimal, UInt $len = 0) returns Str is export {
+sub hex2bin(Str:D $hex where &hexadecimal, UInt $len = 0) returns Str is export(:hex2bin) {
     my @chars = $hex.comb;
     my $bin = '';
 
@@ -133,7 +133,7 @@ sub hex2bin(Str:D $hex where &hexadecimal, UInt $len = 0) returns Str is export 
 # Purpose : Convert a positive integer to a hexadecimal number (string)
 # Params  : Positive decimal number, desired length (optional)
 # Returns : Hexadecimal number (string)
-sub dec2hex(UInt $dec, UInt $len = 0) returns Str is export {
+sub dec2hex(UInt $dec, UInt $len = 0) returns Str is export(:dec2hex) {
     my $hex = sprintf "%x", $dec;
     if $len && $len > $hex.chars {
 	my $s = '0' x ($len - $hex.chars);
@@ -161,7 +161,7 @@ sub dec2bin(UInt $dec, UInt $len = 0) returns Str is export {
 # Purpose : Convert a binary number (string) to a decimal number
 # Params  : Binary number (string), desired length (optional)
 # Returns : Decimal number (or string)
-sub bin2dec(Str:D $bin where &binary, UInt $len = 0) returns Cool is export {
+sub bin2dec(Str:D $bin where &binary, UInt $len = 0) returns Cool is export(:bin2dec) {
     my @bits = $bin.comb;
     @bits .= reverse;
     my $decimal = 0;
@@ -182,9 +182,22 @@ sub bin2dec(Str:D $bin where &binary, UInt $len = 0) returns Cool is export {
 # Purpose : Convert a binary number (string) to a hexadecimal number (string)
 # Params  : Binary number (string), desired length (optional)
 # Returns : Hexadecimal number (string)
-sub bin2hex(Str:D $bin where &binary, UInt $len = 0) returns Str is export {
+sub bin2hex(Str:D $bin where &binary, UInt $len = 0) returns Str is export(:bib2hex) {
     # take the easy way out
     my $dec = bin2dec($bin);
     my $hex = dec2hex($dec, $len);
     return $hex;
 } # bin2hex
+
+#------------------------------------------------------------------------------
+# Subroutine strip-comment
+# Purpose : Strip comments from an input text line
+# Params  : String of text, comment char ('#' is default)
+# Returns : String of text with any comment stripped off
+sub strip-comment(Str $line is copy, Str $comment-char = '#') returns Str is export(:strip-comment) {
+    my $idx = index $line, $comment-char;
+    if $idx.defined {
+	return substr $line, 0, $idx;
+    }
+    return $line;
+}
