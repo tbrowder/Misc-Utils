@@ -4,9 +4,9 @@ unit module Misc::Utils:auth<github:tbrowder>;
 # title: Subroutines Exported by the `:ALL` Tag
 
 # export a debug var for users
-our $DEBUG = False;
+our $DEBUG is export(:DEBUG) = False;
 BEGIN {
-    if %*ENV<NET_IP_LITE_DEBUG> {
+    if %*ENV<MISC_UTILS_DEBUG> {
 	$DEBUG = True;
     }
     else {
@@ -15,10 +15,10 @@ BEGIN {
 }
 
 # define tokens for common regexes
-my token binary           { ^ <[01]>+ $ }
-my token decimal          { ^ \d+ $ }              # actually an int
-my token hexadecimal      { :i ^ <[a..f\d]>+ $ }   # multiple chars
-my token hexadecimalchar  { :i ^ <[a..f\d]> $ }    # single char
+my token binary is export(:token-binary)                   { ^ <[01]>+ $ }
+my token decimal is export(:token-decimal)                 { ^ \d+ $ }              # actually an int
+my token hexadecimal is export(:token-hecadecimal)         { :i ^ <[a..f\d]>+ $ }   # multiple chars
+my token hexadecimalchar is export(:token-hexadecimalchar) { :i ^ <[a..f\d]> $ }    # single char
 
 #------------------------------------------------------------------------------
 # Subroutine count-substrs
@@ -147,7 +147,7 @@ sub dec2hex(UInt $dec, UInt $len = 0) returns Str is export(:dec2hex) {
 # Purpose : Convert a positive integer to a binary number (string)
 # Params  : Positive decimal number, desired length (optional)
 # Returns : Binary number (string)
-sub dec2bin(UInt $dec, UInt $len = 0) returns Str is export {
+sub dec2bin(UInt $dec, UInt $len = 0) returns Str is export(:dec2bin) {
     my $bin = sprintf "%b", $dec;
     if $len && $len > $bin.chars {
 	my $s = '0' x ($len - $bin.chars);
@@ -182,7 +182,7 @@ sub bin2dec(Str:D $bin where &binary, UInt $len = 0) returns Cool is export(:bin
 # Purpose : Convert a binary number (string) to a hexadecimal number (string)
 # Params  : Binary number (string), desired length (optional)
 # Returns : Hexadecimal number (string)
-sub bin2hex(Str:D $bin where &binary, UInt $len = 0) returns Str is export(:bib2hex) {
+sub bin2hex(Str:D $bin where &binary, UInt $len = 0) returns Str is export(:bin2hex) {
     # take the easy way out
     my $dec = bin2dec($bin);
     my $hex = dec2hex($dec, $len);
@@ -203,11 +203,11 @@ sub strip-comment(Str $line is copy, Str $comment-char = '#') returns Str is exp
 } # strip-comment
 
 #------------------------------------------------------------------------------
-# Subroutine
-# Purpose :
-# Params  :
-# Returns :
-sub delta-time-hms($Time) returns Str is export {
+# Subroutine delta-time-hms
+# Purpose : Convert time in seconds to hms format
+# Params  : Time in seconds
+# Returns : Time in hms format, e.g, "3h02m02.65s"
+sub delta-time-hms($Time) returns Str is export(:delta-time-hms) {
     #say "DEBUG exit: Time: $Time";
     #exit;
 
@@ -228,11 +228,11 @@ sub delta-time-hms($Time) returns Str is export {
 
 
 #------------------------------------------------------------------------------
-# Subroutine
-# Purpose :
-# Params  :
-# Returns :
-sub read-sys-time($time-file, :$uts) is export {
+# Subroutine read-sys-time
+# Purpose : An internal helper function that is not exported
+# Params  : Name of a file that contains output from the GNU 'time' command
+# Returns : A list or a single value depending upon the presence of the ':$uts' variable
+sub read-sys-time($time-file, :$uts) {
     say "DEBUG: time-file '$time-file'" if $DEBUG;
     my ($Rts, $Uts, $Sts);
     for $time-file.IO.lines -> $line {
@@ -270,11 +270,11 @@ sub read-sys-time($time-file, :$uts) is export {
 
 
 #------------------------------------------------------------------------------
-# Subroutine
-# Purpose :
-# Params  :
-# Returns :
-sub time-command(Str:D $cmd, :$uts) is export {
+# Subroutine time-command
+# Purpose : Collect the process times for a system command
+# Params  : The command as a string, optionally a parameter to ask for user time only
+# Returns : A list of times or user time only
+sub time-command(Str:D $cmd, :$uts) is export(:time-command) {
     # runs the input cmd using the system 'time' function and returns
     # the process times shown below
 
@@ -299,13 +299,12 @@ sub time-command(Str:D $cmd, :$uts) is export {
 
 } # time-command
 
-
 #------------------------------------------------------------------------------
-# Subroutine
-# Purpose :
-# Params  :
-# Returns :
-sub commify($num) is export {
+# Subroutine commify
+# Purpose : Add commas to a mumber to separate multiples of a thousand
+# Params  : An integer or number with a decimal fraction
+# Returns : The input number with commas added, e.g., 1234.56 => 1,234.56
+sub commify($num) is export(:commify) {
     # translated from Perl Cookbook, 2e, Recipe 2.16
     say "DEBUG: input '$num'" if $DEBUG;
     my $text = $num.flip;
@@ -321,3 +320,78 @@ sub commify($num) is export {
     return $text;
 
 } # commify
+
+#------------------------------------------------------------------------------
+# Subroutine write-paragraph
+# Purpose : Wrap a string of words into a paragraph with a maximum line width (default: 78) and print it to the input file handle
+# Params  : File handle, array of words, max line length, paragraph indent, first line indent, pre-text
+# Returns : Nothing
+sub write-paragraph(IO::Handle:D $fh, @para, UInt :$max-line-length = 78,
+                    UInt :$para-indent = 0, UInt :$first-line-indent = 0, Str :$pre-text = '') is export(:write-paragraph) {
+
+    # get a clean array of words to work with
+    my $s = join ' ', @para;
+    say "DEBUG: s = '$s'" if $DEBUG;
+    my @words = $s.words;
+    say "DEBUG: words = '@words'" if $DEBUG;
+    # calculate the various effective indents and any pre-text effects
+    # get the effective first-line indent
+    my $findent = $first-line-indent ?? $first-line-indent !! $para-indent;
+    # get the effective paragraph indent
+    my $pindent = $pre-text.chars + $para-indent;
+
+    my $findent-spaces = ' ' x $findent;
+    # ready to take care of the first line
+    my $first-line = $pre-text ~ $findent-spaces;
+    my $line = $first-line;
+
+    my $first-word = True;
+    loop {
+        if !+@words {
+            $fh.say: $line;
+            last;
+        }
+
+        my $next = @words[0];
+        $next = ' ' ~ $next if !$first-word;
+        $first-word = False;
+        
+        if $next.chars + $line.chars <= $max-line-length {
+            $line ~= $next;
+            shift @words;
+            next;
+        }
+
+        # we're done here
+        $fh.say: $line;
+        last;
+    }
+
+    # and remaining lines
+    my $pindent-spaces = ' ' x $pindent;
+    $line = $pindent-spaces;
+    $first-word = True;
+    loop {
+        if !+@words {
+            $fh.say: $line;
+            last;
+        }
+
+        my $next = @words[0];
+        $next = ' ' ~ $next if !$first-word;
+        $first-word = False;
+
+        if $next.chars + $line.chars <= $max-line-length {
+            $line ~= $next;
+            shift @words;
+            next;
+        }
+
+        # we're done here
+        $fh.say: $line;
+        # replenish the line
+        $line = $pindent-spaces;
+        $first-word = True;
+    }
+
+} # write-paragraph
