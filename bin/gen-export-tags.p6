@@ -2,25 +2,23 @@
 
 # standard for self-documenting a program
 #------------------------------------------------------------------------------
-# Program create-md.p6
-# Purpose : Create markdown documentation for programs in a github repository
+# Program gen-export-tags.p6
+# Purpose : Generate name tags for exported objects in a module
 # Help    : Yes
 
 use Getopt::Std;
-use Misc::Utils;
-
-my $max-line-length = 78;
 
 ##### option handling ##############################
 my %opts; # Getopts::Std requires this (name it anything you want)
 # ensure we have a var for each option
-my ($mfil, $bdir, $odir, $nofold, $debug, $verbose);
-my $usage = "Usage: $*PROGRAM -m <file> | -b <bin dir> | -h [-d <odir>, -N, -M <max>, -D]";
+my ($mfil, $odir, $debug, $verbose);
+my $usage = "Usage: $*PROGRAM -m <file> | -h [-d <odir>, -D]";
 sub usage() {
    print qq:to/END/;
    $usage
 
-   Reads the input module (or program files in the bin dir) and
+   Reads the input module file and adds the name of exported objects
+   as a tag in each object's export trait. 
    extracts properly formatted comments into markdown files describing
    the subs and other objects contained therein.  Output files are
    created in the output directory (-d <dir>) if entered, or the
@@ -104,8 +102,6 @@ my $modfil = $mfil;
 my $tgtdir = $odir;
 my $bindir = $bdir;
 
-# the following two hashes have values for the leading
-# markdown code for the key parts
 my %kw = [
     # subroutines
     'Subroutine' => '###',
@@ -133,21 +129,21 @@ if $modfil {
     create-subs-md($modfil);
     say %mdfils.perl if $debug;
 
+    # need to make a TOC
+    say "WARNING: Tom, make a TOC";
+
     my @ofils;
     for %mdfils.keys -> $f is copy {
-	# distinguish between file base name and path
+	# distinguish bewteen file base name and path
 	my $of = $f;
 	$of = $tgtdir ~ '/' ~ $of if $tgtdir;
+	push @ofils, $of;
 	my $fh = open $of, :w;
 
 	$fh.say: %mdfils{$f}<title>;
 
 	my %hs = %(%mdfils{$f}<subs>);
 	my @subs = %hs.keys.sort;
-
-        # need to make a TOC
-        create-toc-md($fh, 'Contents', @subs, 2, :add-link(True));
-
 	for @subs -> $s {
             say "sub: $s" if $debug;
             my @lines = @(%hs{$s});
@@ -158,11 +154,11 @@ if $modfil {
 	$fh.close;
         @ofils.push($of);
     }
-
-    my $s = @ofils.elems > 1 ?? 's' !! '';
+    
+    my $s = @ofils.elems > 1 ?? 's' !! '';	
     say "see output file$s:";
     say "  $_" for @ofils;
-
+    
 }
 
 # HANDLE BINARY PROGS =================================================
@@ -170,6 +166,9 @@ my %binfils;
 if $bindir {
     create-bin-md($bindir);
     say %binfils.perl if $debug;
+
+    # need to make a TOC
+    say "WARNING: Tom, make a TOC";
 
     # distinguish between file base name and path
     my $of = 'PROGRAMS.md';
@@ -180,9 +179,6 @@ if $bindir {
     $fh.say: $title;
 
     my @progs = %binfils.keys.sort;
-    # need to make a TOC
-    create-toc-md($fh, 'Contents', @progs, 1, :add-link(True));
-
     for @progs -> $p {
         say "program: $p" if $debug;
         my @lines = @(%binfils{$p});
@@ -527,56 +523,4 @@ sub get-kw-line-data(:$val, :$kw, :@words is copy) returns Str {
     }
 
     return $txt;
-}
-
-sub create-toc-md($fh, $title, @list is copy, $ncols, :@headings, :@just, :$add-link) {
-    my $ne = @list.elems;
-    my $nrows = $ne div $ncols;
-    ++$nrows if $ne % $ncols; # check for partial columns
-
-    $fh.say: "\n### $title\n";
-    if @headings.elems {
-        my $nh = @headings.elems;
-        my $nj = @just.elems ?? @just.elems !! 0;
-
-        die "FATAL: \$headings.elems ($nh) not equal to \$ncols ($ncols)" if $nh != $ncols;
-        die "FATAL: \$just.elems ($nj) not equal to \$ncols ($ncols)" if $nj && $nj != $ncols;
-
-        # need 2 loops
-        # column headings
-        for @headings -> $h {
-            $fh.print: "| $h";
-        }
-        $fh.say: ' |';
-
-        # the heading separator row
-        for 0..^$ncols -> $i {
-            my $b = '---';
-            if $nj {
-                given @just[$i] {
-                    when /:i L/ { $b = ':' ~ $b }
-                    when /:i C/ {               } # use the default
-		    when /:i R/ { $b ~= ':'     }
-                }
-            }
-            $fh.print: "| $b";
-        }
-        $fh.say: ' |';
-    }
-
-    # add the table content
-    for 0..^$nrows {
-        for 0..^$ncols {
-            my $c = @list.elems ?? @list.shift !! '';
-            if $c && $add-link {
-                # add the link
-                my $link = '#' ~ lc $c;
-                $fh.print: "| [$c]($link)";
-            }
-            else {
-                $fh.print: "| $c";
-            }
-        }
-        $fh.say: ' |';
-    }
 }
