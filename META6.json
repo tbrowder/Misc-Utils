@@ -5,16 +5,20 @@
     "description" : "Provides miscellaneous utility functions and programs.",
     "authors"     : [ "github:tbrowder" ],
     "license"     : "Artistic 2.0",
-    "source-url"  : "https://github.com/tbrowder/Misc-Utils-Perl6/archive/0.1.0.tar.gz",
+    "source-url"  : "https://github.com/tbrowder/Misc-Utils-Perl6.git",
     "support"     : {
         "bugtracker" : "https://github.com/tbrowder/Misc-Utils-Perl6/issues",
         "source"     : "https://github.com/tbrowder/Misc-Utils-Perl6"
     },
     "provides"    : {
-        "Misc-Utils-Perl6" : "lib/Misc/Utils.pm6"
+        "Misc::Utils" : "lib/Misc/Utils.pm6"
     },
     "test-depends"     : [
 	"Test::META"
+    ],
+    "depends" : [
+	"Getopt::Std",
+	"File::Temp"
     ],
     "resources" : [
     ],
