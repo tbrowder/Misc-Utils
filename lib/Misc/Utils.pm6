@@ -327,7 +327,8 @@ sub commify($num) is export(:commify) {
 # Params  : File handle, array of words, max line length, paragraph indent, first line indent, pre-text
 # Returns : Nothing
 sub write-paragraph(IO::Handle:D $fh, @para, UInt :$max-line-length = 78,
-                    UInt :$para-indent = 0, UInt :$first-line-indent = 0, Str :$pre-text = '') is export(:write-paragraph) {
+                    UInt :$para-indent = 0, UInt :$first-line-indent = 0, 
+                    Str :$pre-text = '') is export(:write-paragraph) {
 
     # get a clean array of words to work with
     my $s = join ' ', @para;
