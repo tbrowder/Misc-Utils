@@ -8,7 +8,7 @@ a module; whence comes this collection of Perl 6 subroutines I have
 written during my coding adventures using Perl 5's new little sister.
 
 This module also includes various utility programs in the bin
-directory, along with examples in the examples directory.
+directory.
 
 ## Status
 
@@ -33,16 +33,22 @@ $Misc::Utils::DEBUG = True;
 MISC_UTILS_DEBUG=1
 ```
 
-## Subroutines Exported by Default
+## Subroutines Exported by the `:ALL` Tag
 
 ```Perl6
-use Net::IP::Lite;
+use Misc::Utils :ALL;
 ```
 
 See
-[DEFAULT-SUBS](https://github.com/tbrowder/Misc-Utils-Perl6/blob/master/docs/DEFAULT-SUBS.md)
-for a list of default-exported subroutines, each with a short
-description along with its complete signature.
+[ALL-SUBS](https://github.com/tbrowder/Misc-Utils-Perl6/blob/master/docs/ALL-SUBS.md)
+for a list of export(:ALL) subroutines, each with a short description
+along with its complete signature.
+
+Note that individual subroutines may also be exported:
+
+```Perl6
+use Misc::Utils :strip-comment;
+```
 
 ## Utility Programs
 
