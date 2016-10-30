@@ -2,6 +2,7 @@
 
 ### Contents
 
+| --- | --- | --- |
 | [bin2dec](#bin2dec)| [bin2hex](#bin2hex) |
 | [count-substrs](#count-substrs)| [dec2bin](#dec2bin) |
 | [dec2hex](#dec2hex)| [hex2bin](#hex2bin) |
