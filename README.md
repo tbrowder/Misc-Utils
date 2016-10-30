@@ -5,7 +5,7 @@
 
 Being a lazy programmer, I refactor chunks of code I find useful into
 a module; whence comes this collection of Perl 6 subroutines I have
-iwritten during my coding adventures using Perl 5's new little sister.
+written during my coding adventures using Perl 5's new little sister.
 
 This module also includes various utility programs in the bin
 directory.
