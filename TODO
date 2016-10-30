@@ -18,6 +18,10 @@ make more robust to system failures, especially for proc calls
 REQUIREMENTS FOR NEXT RELEASE
 ======================================
 
+allow multi-line text following a keyword
+  consider ending wither with either: a blank line, another keyword line,
+  an explicit comment line ("# end:"), or a non-comment line
+
 use DateTime::Math for date functions
 
 use Perl 6 built-in routines :base(str) and base(str) to simplify
