@@ -146,7 +146,7 @@ if $modfil {
 	my @subs = %hs.keys.sort;
 
         # need to make a TOC
-        create-toc-md($fh, 'Contents', @subs, 2, :add-link(True));
+        create-toc-md($fh, 'Contents', @subs, 3, :add-link(True));
 
 	for @subs -> $s {
             say "sub: $s" if $debug;
@@ -373,8 +373,132 @@ sub create-subs-md($f) {
 
 sub fold-sub-lines(@sublines, $subname) returns List {
     # get one long string to start with
-    my $sig = join ' ', @sublines;
+    my $sig = normalize-string(join ' ', @sublines);
 
+    # error checks
+    $idx = index $sig, '{#...}';
+    die "FATAL: unable to find ending '\{#...}' in sub sig '$sig'" if !$idx.defined;
+    $idx = index $sig, '(';
+    die "FATAL: unable to find opening '(' in sub sig '$sig'" if !$idx.defined;
+
+    my @lines;
+
+    # ideally we break into two lines after the params ')'
+    my $idx = index $sig, ')';
+    die "FATAL: unable to find a closing ')' in sub sig '$sig'" if !$idx.defined;
+    my $fold-line = False;
+    if $idx > $max-line-length {
+        # try to fold on the last comma before max line length
+        $idx = rindex $sig, ',', $max-line-length;
+        say "DEBUG: idx = $idx" if $debug;
+        # bad juju!
+        die "FATAL: unable to find a comma ',' in sub sig '$sig'" if !$idx.defined;
+        $fold-line = True;
+    }
+ 
+    my $line1 = substr $sig, 0, $idx + 1;
+    # line1 is known to be good
+    @lines.push: $line1;
+
+    my $line2 = substr $sig, $idx + 1;
+    my $fold-indent = ' ' x 2;
+    if $fold-line {
+        # start the second line at the sig open paren
+        $idx = index $line1, '(';
+        die "FATAL: unable to find opening '(' in sub sig '$sig'" if !$idx.defined;
+        $fold-indent = ' ' x $idx+1;
+        $line2 .= trim;
+        $line2 = $fold-indent ~ $line2;
+    }
+    else {
+        # put two spaces leading the second line
+        $line2 .= trim;
+        $line2 =  $fold-indent ~ $line2;
+    }
+    
+die "start here";
+
+=begin pod
+    my $fold-line = False;
+    if $idx > $max-line-length {
+        $idx = rindex $sig, ',', $max-line-length;
+        say "DEBUG: idx = $idx";
+        # bad juju!
+        die "FATAL: unable to find a comma ',' in sub sig '$sig'" if !$idx.defined;
+        $fold-line = True;
+    }
+ 
+    my $line1 = substr $sig, 0, $idx + 1;
+    # line1 is known to be good
+    @lines.push: $line1;
+
+    my $line2 = substr $sig, $idx + 1;
+    my $fold-indent = ' ' x 2;
+    if $fold-line {
+        # start the second line at the sig open paren
+        $idx = index $line1, '(';
+        die "FATAL: unable to find opening '(' in sub sig '$sig'" if !$idx.defined;
+        $fold-indent = ' ' x $idx+1;
+        $line2 .= trim;
+        $line2 = $fold-indent ~ $line2;
+    }
+    else {
+        # put two spaces leading the second line
+        $line2 .= trim;
+        $line2 =  $fold-indent ~ $line2;
+    }
+
+    if $line2.chars <= $max-line-length {
+        # we're done
+        @lines.push: $line2; 
+        # return the folded lines
+        say "NOTE:  sub '$subname' lines were folded" if $verbose;
+        return @lines;
+    }
+
+    $fold-line = False;
+    $idx = index $line2, ')';
+    if $idx > $max-line-length {
+        $idx = rindex $line2, ',', $max-line-length;
+        say "DEBUG: idx = $idx";
+        # bad juju!
+        die "FATAL: unable to find a comma ',' in sub sig '$sig'" if !$idx.defined;
+        $fold-line = True;
+    }
+    if $fold-line {
+        # start the second line at the sig open paren
+        $idx = index $line1, '(';
+        die "FATAL: unable to find opening '(' in sub sig '$sig'" if !$idx.defined;
+        $fold-indent = ' ' x $idx+1;
+        $line2 .= trim;
+        $line2 = $fold-indent ~ $line2;
+    }
+    $idx = index $line2, ')';
+    # split line2
+    my $line3 = substr $line2, $idx + 1;
+    $line2 = substr $line2, 0, $idx + 1;
+    # line2 is known to be good
+    @lines.push: $line2;
+
+    # hope for the best and split line
+
+
+
+
+    # temp return:
+    @lines.push: $line2; 
+    @lines.push: $line3; 
+    return @lines;
+
+    # fold lines if they're too long
+    my ($maxlen, $maxidx) = analyze-line-lengths(@lines);
+    if $maxlen > $max-line-length {
+        #@lines = shorten-sub-sig-lines(@lines);
+        say "DEBUG: maxlen = $maxlen, maxidx = $maxidx";
+    }
+
+=end pod
+=begin pod
     # first we break into two lines after the params ')'
     my @lines;
     my $idx = index $sig, ')';
@@ -400,10 +524,8 @@ sub fold-sub-lines(@sublines, $subname) returns List {
     if $maxlen > $max-line-length {
         @lines = shorten-sub-sig-lines(@lines);
     }
+=end pod
 
-    # return the folded lines
-    say "NOTE:  sub '$subname' lines were folded" if $verbose;
-    return @lines;
 
 }
 
@@ -464,24 +586,26 @@ sub analyze-line-lengths(@lines) returns List {
     my $nl = +@lines;
     my %nc;
     my $maxlen = 0;
-    my $maxid  = 0;
+    my $maxidx = 0;
     my $i = 0;
     for @lines -> $line {
         my $m = $line.chars;
         %nc{$i} = $m;
         if $m > $maxlen {;
             $maxlen = $m;
-            $maxid  = $i;
+            $maxidx = $i;
         }
+        ++$i;
     }
 
-    return ($maxlen, $maxid);
+    return ($maxlen, $maxidx);
 
 } # analyze-line-lengths
 
 # candidate for a util module
-sub normalize-string($str) {
+sub normalize-string(Str:D $str is copy) returns Str {
     $str ~~ s:g/ \s ** 2..*/ /;
+    return $str;
 } # normalize-string
 
 sub get-kw-line-data(:$val, :$kw, :@words is copy) returns Str {
@@ -559,6 +683,22 @@ sub create-toc-md($fh, $title, @list is copy, $ncols, :@headings, :@just, :$add-
 		    when /:i R/ { $b ~= ':'     }
                 }
             }
+            $fh.print: "| $b";
+        }
+        $fh.say: ' |';
+    }
+    # note that at the moment github markdown requires column headings 
+    else {
+        # need 2 loops
+        # column headings
+        for 1..$ncols -> $n {
+            $fh.print: "| Col $n";
+        }
+        $fh.say: ' |';
+
+        # the heading separator row
+        for 0..^$ncols -> $i {
+            my $b = '---';
             $fh.print: "| $b";
         }
         $fh.say: ' |';
