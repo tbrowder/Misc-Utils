@@ -12,13 +12,20 @@ incorporate useful progs
 
 all progs must have the standard comments for progs for docs
 
+make more robust to system failures, especially for proc calls
+
+======================================
+REQUIREMENTS FOR NEXT RELEASE
+======================================
+
+use DateTime::Math for date functions
+
 use Perl 6 built-in routines :base(str) and base(str) to simplify
   number base conversions
 
 make length args to base conversions named params
 
 add named param for upper case to base conversions
-
 
 ------------------------------------------
 DONE:
