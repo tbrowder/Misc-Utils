@@ -2,6 +2,8 @@
 REQUIREMENTS FOR INITIAL, BETA RELEASE
 ======================================
 
+enable folding sub lines to max-line-length
+
 incorporate suitable subs from all my p6 programs
 
 make tests for all subs; tests must use plan N
