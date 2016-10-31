@@ -375,203 +375,85 @@ sub fold-sub-lines(@sublines, $subname) returns List {
     # get one long string to start with
     my $sig = normalize-string(join ' ', @sublines);
 
+{
     # error checks
+    my $idx = index $sig, ')';
+    die "FATAL: unable to find a closing ')' in sub sig '$sig'" if !$idx.defined;
     $idx = index $sig, '{#...}';
     die "FATAL: unable to find ending '\{#...}' in sub sig '$sig'" if !$idx.defined;
     $idx = index $sig, '(';
     die "FATAL: unable to find opening '(' in sub sig '$sig'" if !$idx.defined;
-
-    my @lines;
-
-    # ideally we break into two lines after the params ')'
-    my $idx = index $sig, ')';
-    die "FATAL: unable to find a closing ')' in sub sig '$sig'" if !$idx.defined;
-    my $fold-line = False;
-    if $idx > $max-line-length {
-        # try to fold on the last comma before max line length
-        $idx = rindex $sig, ',', $max-line-length;
-        say "DEBUG: idx = $idx" if $debug;
-        # bad juju!
-        die "FATAL: unable to find a comma ',' in sub sig '$sig'" if !$idx.defined;
-        $fold-line = True;
-    }
- 
-    my $line1 = substr $sig, 0, $idx + 1;
-    # line1 is known to be good
-    @lines.push: $line1;
-
-    my $line2 = substr $sig, $idx + 1;
-    my $fold-indent = ' ' x 2;
-    if $fold-line {
-        # start the second line at the sig open paren
-        $idx = index $line1, '(';
-        die "FATAL: unable to find opening '(' in sub sig '$sig'" if !$idx.defined;
-        $fold-indent = ' ' x $idx+1;
-        $line2 .= trim;
-        $line2 = $fold-indent ~ $line2;
-    }
-    else {
-        # put two spaces leading the second line
-        $line2 .= trim;
-        $line2 =  $fold-indent ~ $line2;
-    }
-    
-die "start here";
-
-=begin pod
-    my $fold-line = False;
-    if $idx > $max-line-length {
-        $idx = rindex $sig, ',', $max-line-length;
-        say "DEBUG: idx = $idx";
-        # bad juju!
-        die "FATAL: unable to find a comma ',' in sub sig '$sig'" if !$idx.defined;
-        $fold-line = True;
-    }
- 
-    my $line1 = substr $sig, 0, $idx + 1;
-    # line1 is known to be good
-    @lines.push: $line1;
-
-    my $line2 = substr $sig, $idx + 1;
-    my $fold-indent = ' ' x 2;
-    if $fold-line {
-        # start the second line at the sig open paren
-        $idx = index $line1, '(';
-        die "FATAL: unable to find opening '(' in sub sig '$sig'" if !$idx.defined;
-        $fold-indent = ' ' x $idx+1;
-        $line2 .= trim;
-        $line2 = $fold-indent ~ $line2;
-    }
-    else {
-        # put two spaces leading the second line
-        $line2 .= trim;
-        $line2 =  $fold-indent ~ $line2;
-    }
-
-    if $line2.chars <= $max-line-length {
-        # we're done
-        @lines.push: $line2; 
-        # return the folded lines
-        say "NOTE:  sub '$subname' lines were folded" if $verbose;
-        return @lines;
-    }
-
-    $fold-line = False;
-    $idx = index $line2, ')';
-    if $idx > $max-line-length {
-        $idx = rindex $line2, ',', $max-line-length;
-        say "DEBUG: idx = $idx";
-        # bad juju!
-        die "FATAL: unable to find a comma ',' in sub sig '$sig'" if !$idx.defined;
-        $fold-line = True;
-    }
-    if $fold-line {
-        # start the second line at the sig open paren
-        $idx = index $line1, '(';
-        die "FATAL: unable to find opening '(' in sub sig '$sig'" if !$idx.defined;
-        $fold-indent = ' ' x $idx+1;
-        $line2 .= trim;
-        $line2 = $fold-indent ~ $line2;
-    }
-    $idx = index $line2, ')';
-    # split line2
-    my $line3 = substr $line2, $idx + 1;
-    $line2 = substr $line2, 0, $idx + 1;
-    # line2 is known to be good
-    @lines.push: $line2;
-
-    # hope for the best and split line
-
-
-
-
-    # temp return:
-    @lines.push: $line2; 
-    @lines.push: $line3; 
-    return @lines;
-
-    # fold lines if they're too long
-    my ($maxlen, $maxidx) = analyze-line-lengths(@lines);
-    if $maxlen > $max-line-length {
-        #@lines = shorten-sub-sig-lines(@lines);
-        say "DEBUG: maxlen = $maxlen, maxidx = $maxidx";
-    }
-
-=end pod
-=begin pod
-    # first we break into two lines after the params ')'
-    my @lines;
-    my $idx = index $sig, ')';
-    die "FATAL: unable to find a closing ')' in sub sig '$sig'" if !$idx.defined;
-
-    my $line1 = substr $sig, 0, $idx + 1;
-    my $line2 = substr $sig, $idx + 1;
-    # error check
-    $idx = index $line2, '{#...}';
-    if !$idx.defined {
-        die "FATAL: unable to find ending '\{#...} ' in sub sig '$sig'";
-    }
-    # put two spaces leading the second line
-    $line2 .= trim;
-    $line2 = '  ' ~ $line2;
-
-
-    @lines.push: $line1;
-    @lines.push: $line2;
-
-    # fold lines if they're too long
-    my ($maxlen, $maxid) = analyze-line-lengths(@lines);
-    if $maxlen > $max-line-length {
-        @lines = shorten-sub-sig-lines(@lines);
-    }
-=end pod
-
-
 }
 
-sub shorten-sub-sig-lines(@siglines) returns List {
-    # treat the longest line which normally should be the first one
-    # we'll first fold the line at the last comma in the param list
-    # then we recalc and reanalyze
+    my @lines;
 
-    my $nl = +@siglines;
-    die "FATAL: should have 2 lines but have $nl" if $nl != 2;
-    my ($line1, $line2) = @siglines[0..1];
+    # ideally we break into two lines after the params ')';
+    # note we break regardless of line length at this point
+    my ($line1, $last-line) = split-line($sig, ')');
+    # indent two spaces on the last line
+    $last-line = '  ' ~ $last-line;
+    if $last-line.chars > $max-line-length {
+        die "UNEXPECTED last line too long: '$last-line'";
+    }
 
-    # new list for folded lines
-    my @lines = [];
+    if $line1.chars > $max-line-length {
+        my $idx = index $line1, '(';
+        my $fold-indent = ' ' x $idx+1;
+        my $first-line = True;
 
-    # find last comma in param list, if any
-    my $idx = rindex $line1, ',';
-    if $idx.defined {
-	my $line1-a = substr $line1, 0, $idx + 1; # keep the comma on this line
-	my $line1-b = substr $line1, $idx + 1;    # take remainder of the line
-	$line1-b .= trim;
-	#  we want leading whitespace on the second line so it
-	# lines up one char past left paren
-	my $idx2 = index $line1-a, '(';
-	die "FATAL: unexpected missing '(', line: '$line1'" if !$idx2.defined;
-	my $spaces = ' ' x $idx2 + 1;
-	$line1-b = $spaces ~ $line1-b;
-	@lines.push: $line1-a;
-	@lines.push: $line1-b;
-	@lines.push: $line2;
+        # keep splitting until done
+        my @tlines;
+        my $s1 = $line1;
+        my $s2 = '';
+
+        loop {
+            $s2 = split-line-rw($s1, ',', :max-line-length($max-line-length), :rindex(True));
+            # $s1 is known good
+            #$s1 = $fold-indent ~ $s1 if !$first-line;
+            @tlines.push($s1);
+            $first-line = False;
+
+            if !$s2 {
+                # we're done
+                last;
+            } 
+
+            # add the standard indent to the opening paren
+            $s2 = $fold-indent ~ $s2;
+            if $s2.chars <= $max-line-length {
+                # we're done
+                @tlines.push($s2);
+                last;
+            }
+
+            # need another split
+            $s1 = $s2;
+            $s2 = '';
+        }
+        if $debug {
+            say "DEBUG: in sub $subname, @tlines:";
+            say "  lines:";
+            say "    $_" for @tlines;
+        }
+
+        @lines.push($_) for @tlines;
     }
     else {
-	say "FATAL: Don't know how to handle second line as longest";
-        die "FATAL: file a bug report";
+        @lines.push($line1);
     }
 
-    # any improvement?
-    my ($maxlen, $maxid) = analyze-line-lengths(@lines);
+    # don't forget the last line!
+    @lines.push($last-line);
+
+    # sanity check
+    my ($maxlen, $maxidx) = analyze-line-lengths(@lines);
     if $maxlen > $max-line-length {
-	say "FATAL: Don't know how to handle these sub lines where line $maxid is too long:";
-	for @lines {
-	    say $_;
-	}
-        die "FATAL: file a bug report";
+        say "WARNING: in sub $subname: maxlen = $maxlen, maxidx = $maxidx";
+        say "  lines:";
+        say "    $_" for @lines;
     }
-
+    # return the folded lines
+    say "NOTE:  sub '$subname' lines were folded" if $verbose;
     return @lines;
 
 }
@@ -602,11 +484,60 @@ sub analyze-line-lengths(@lines) returns List {
 
 } # analyze-line-lengths
 
-# candidate for a util module
+# TODO: candidates for a util module
 sub normalize-string(Str:D $str is copy) returns Str {
     $str ~~ s:g/ \s ** 2..*/ /;
     return $str;
 } # normalize-string
+sub normalize-string-rw(Str:D $str is rw) {
+    $str ~~ s:g/ \s ** 2..*/ /;
+} # normalize-string-rw
+
+sub split-line(Str:D $line is copy, Str:D $brk, UInt :$max-line-length = 78, UInt :$start-pos = 0, Bool :$rindex = False) returns List {
+    my $line2 = '';
+    return ($line, $line2) if $max-line-length && $line.chars <= $max-line-length;
+    
+    my $idx;
+    if $rindex {
+        my $spos = max $start-pos, $max-line-length;
+        $idx = $spos ?? rindex $line, $brk, $spos !! rindex $line, $brk;
+    }
+    else { 
+        $idx = $start-pos ?? index $line, $brk, $start-pos !! index $line, $brk;
+    }
+    if $idx.defined {
+        $line2 = substr $line, $idx+1;
+        $line  = substr $line, 0, $idx+1;
+
+        $line  .= trim-trailing;
+        $line2 .= trim;
+    }
+    return ($line, $line2);
+
+} # split-line
+
+sub split-line-rw(Str:D $line is rw, Str:D $brk, UInt :$max-line-length = 78, UInt :$start-pos = 0, Bool :$rindex = False) returns Str {
+    my $line2 = '';
+    return $line2 if $max-line-length && $line.chars <= $max-line-length;
+    
+    my $idx;
+    if $rindex {
+        my $spos = max $start-pos, $max-line-length;
+        $idx = $spos ?? rindex $line, $brk, $spos !! rindex $line, $brk;
+    }
+    else { 
+        $idx = $start-pos ?? index $line, $brk, $start-pos !! index $line, $brk;
+    }
+    if $idx.defined {
+        $line2 = substr $line, $idx+1;
+        $line  = substr $line, 0, $idx+1;
+
+        $line  .= trim-trailing;
+        $line2 .= trim;
+    }
+    return $line2;
+
+} # split-line-rw
 
 sub get-kw-line-data(:$val, :$kw, :@words is copy) returns Str {
     say "TOM FIX THIS TO HANDLE EACH KEYWORD PROPERLY" if $debug;
@@ -646,7 +577,7 @@ sub get-kw-line-data(:$val, :$kw, :@words is copy) returns Str {
         when 'title:'     {
             # pass back all with leading markup
             $txt ~= $val if $val;
-            $txt ~= ' ' ~ join ' ', @words;
+            $txt ~= ' ' ~ join ' ', @words[1..*];
         }
     }
 
