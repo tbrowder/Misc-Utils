@@ -7,7 +7,7 @@
 # Help    : Yes
 
 use Getopt::Std;
-use Misc::Utils;
+use Misc::Utils :ALL;
 
 my $max-line-length = 78;
 
