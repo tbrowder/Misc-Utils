@@ -375,15 +375,15 @@ sub fold-sub-lines(@sublines, $subname) returns List {
     # get one long string to start with
     my $sig = normalize-string(join ' ', @sublines);
 
-{
-    # error checks
-    my $idx = index $sig, ')';
-    die "FATAL: unable to find a closing ')' in sub sig '$sig'" if !$idx.defined;
-    $idx = index $sig, '{#...}';
-    die "FATAL: unable to find ending '\{#...}' in sub sig '$sig'" if !$idx.defined;
-    $idx = index $sig, '(';
-    die "FATAL: unable to find opening '(' in sub sig '$sig'" if !$idx.defined;
-}
+    {
+	# error checks
+	my $idx = index $sig, ')';
+	die "FATAL: unable to find a closing ')' in sub sig '$sig'" if !$idx.defined;
+	$idx = index $sig, '{#...}';
+	die "FATAL: unable to find ending '\{#...}' in sub sig '$sig'" if !$idx.defined;
+	$idx = index $sig, '(';
+	die "FATAL: unable to find opening '(' in sub sig '$sig'" if !$idx.defined;
+    }
 
     my @lines;
 
@@ -416,7 +416,7 @@ sub fold-sub-lines(@sublines, $subname) returns List {
             if !$s2 {
                 # we're done
                 last;
-            } 
+            }
 
             # add the standard indent to the opening paren
             $s2 = $fold-indent ~ $s2;
@@ -484,60 +484,6 @@ sub analyze-line-lengths(@lines) returns List {
 
 } # analyze-line-lengths
 
-# TODO: candidates for a util module
-sub normalize-string(Str:D $str is copy) returns Str {
-    $str ~~ s:g/ \s ** 2..*/ /;
-    return $str;
-} # normalize-string
-sub normalize-string-rw(Str:D $str is rw) {
-    $str ~~ s:g/ \s ** 2..*/ /;
-} # normalize-string-rw
-
-sub split-line(Str:D $line is copy, Str:D $brk, UInt :$max-line-length = 78, UInt :$start-pos = 0, Bool :$rindex = False) returns List {
-    my $line2 = '';
-    return ($line, $line2) if $max-line-length && $line.chars <= $max-line-length;
-    
-    my $idx;
-    if $rindex {
-        my $spos = max $start-pos, $max-line-length;
-        $idx = $spos ?? rindex $line, $brk, $spos !! rindex $line, $brk;
-    }
-    else { 
-        $idx = $start-pos ?? index $line, $brk, $start-pos !! index $line, $brk;
-    }
-    if $idx.defined {
-        $line2 = substr $line, $idx+1;
-        $line  = substr $line, 0, $idx+1;
-
-        $line  .= trim-trailing;
-        $line2 .= trim;
-    }
-    return ($line, $line2);
-
-} # split-line
-
-sub split-line-rw(Str:D $line is rw, Str:D $brk, UInt :$max-line-length = 78, UInt :$start-pos = 0, Bool :$rindex = False) returns Str {
-    my $line2 = '';
-    return $line2 if $max-line-length && $line.chars <= $max-line-length;
-    
-    my $idx;
-    if $rindex {
-        my $spos = max $start-pos, $max-line-length;
-        $idx = $spos ?? rindex $line, $brk, $spos !! rindex $line, $brk;
-    }
-    else { 
-        $idx = $start-pos ?? index $line, $brk, $start-pos !! index $line, $brk;
-    }
-    if $idx.defined {
-        $line2 = substr $line, $idx+1;
-        $line  = substr $line, 0, $idx+1;
-
-        $line  .= trim-trailing;
-        $line2 .= trim;
-    }
-    return $line2;
-
-} # split-line-rw
 
 sub get-kw-line-data(:$val, :$kw, :@words is copy) returns Str {
     say "TOM FIX THIS TO HANDLE EACH KEYWORD PROPERLY" if $debug;
@@ -618,7 +564,7 @@ sub create-toc-md($fh, $title, @list is copy, $ncols, :@headings, :@just, :$add-
         }
         $fh.say: ' |';
     }
-    # note that at the moment github markdown requires column headings 
+    # note that at the moment github markdown requires column headings
     else {
         # need 2 loops
         # column headings
