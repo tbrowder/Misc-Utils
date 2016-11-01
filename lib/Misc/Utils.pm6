@@ -324,10 +324,10 @@ sub commify($num) is export(:commify) {
 #------------------------------------------------------------------------------
 # Subroutine write-paragraph
 # Purpose : Wrap a string of words into a paragraph with a maximum line width (default: 78) and print it to the input file handle
-# Params  : File handle, array of words, max line length, paragraph indent, first line indent, pre-text
+# Params  : Output file handle, array of words, max line length, paragraph indent, first line indent, pre-text
 # Returns : Nothing
 sub write-paragraph(IO::Handle:D $fh, @para, UInt :$max-line-length = 78,
-                    UInt :$para-indent = 0, UInt :$first-line-indent = 0, 
+                    UInt :$para-indent = 0, UInt :$first-line-indent = 0,
                     Str :$pre-text = '') is export(:write-paragraph) {
 
     # get a clean array of words to work with
@@ -356,7 +356,7 @@ sub write-paragraph(IO::Handle:D $fh, @para, UInt :$max-line-length = 78,
         my $next = @words[0];
         $next = ' ' ~ $next if !$first-word;
         $first-word = False;
-        
+
         if $next.chars + $line.chars <= $max-line-length {
             $line ~= $next;
             shift @words;
@@ -396,3 +396,82 @@ sub write-paragraph(IO::Handle:D $fh, @para, UInt :$max-line-length = 78,
     }
 
 } # write-paragraph
+
+#------------------------------------------------------------------------------
+# Subroutine normalize-string
+# Purpose :
+# Params  :
+# Returns :
+sub normalize-string(Str:D $str is copy) returns Str is export(:normalize-string) {
+    $str .= trim;
+    $str ~~ s:g/ \s ** 2..*/ /;
+    return $str;
+} # normalize-string
+
+#------------------------------------------------------------------------------
+# Subroutine normalize-string-rw
+# Purpose :
+# Params  :
+# Returns :
+sub normalize-string-rw(Str:D $str is rw) is export(:normalize-string-rw) {
+    $str .= trim;
+    $str ~~ s:g/ \s ** 2..*/ /;
+} # normalize-string-rw
+
+#------------------------------------------------------------------------------
+# Subroutine split-line
+# Purpose :
+# Params  :
+# Returns :
+sub split-line(Str:D $line is copy, Str:D $brk, UInt :$max-line-length = 78,
+               UInt :$start-pos = 0, Bool :$rindex = False) returns List is export(:split-line) {
+    my $line2 = '';
+    return ($line, $line2) if $max-line-length && $line.chars <= $max-line-length;
+
+    my $idx;
+    if $rindex {
+        my $spos = max $start-pos, $max-line-length;
+        $idx = $spos ?? rindex $line, $brk, $spos !! rindex $line, $brk;
+    }
+    else {
+        $idx = $start-pos ?? index $line, $brk, $start-pos !! index $line, $brk;
+    }
+    if $idx.defined {
+        $line2 = substr $line, $idx+1;
+        $line  = substr $line, 0, $idx+1;
+
+        $line  .= trim-trailing;
+        $line2 .= trim;
+    }
+    return ($line, $line2);
+
+} # split-line
+
+#------------------------------------------------------------------------------
+# Subroutine split-line-rw
+# Purpose :
+# Params  :
+# Returns :
+sub split-line-rw(Str:D $line is rw, Str:D $brk, UInt :$max-line-length = 78,
+                  UInt :$start-pos = 0, Bool :$rindex = False) returns Str is export(:split-line-rw) {
+    my $line2 = '';
+    return $line2 if $max-line-length && $line.chars <= $max-line-length;
+
+    my $idx;
+    if $rindex {
+        my $spos = max $start-pos, $max-line-length;
+        $idx = $spos ?? rindex $line, $brk, $spos !! rindex $line, $brk;
+    }
+    else {
+        $idx = $start-pos ?? index $line, $brk, $start-pos !! index $line, $brk;
+    }
+    if $idx.defined {
+        $line2 = substr $line, $idx+1;
+        $line  = substr $line, 0, $idx+1;
+
+        $line  .= trim-trailing;
+        $line2 .= trim;
+    }
+    return $line2;
+
+} # split-line-rw
