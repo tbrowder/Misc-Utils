@@ -3,12 +3,19 @@ MFIL = ../lib/Misc/Utils.pm6
 TDIR = ../docs
 BDIR = ../bin
 
-create: subs
+DEBUG =
+#DEBUG = -D
+
+#create: subs2
+#create: subs
 #create: progs
-#create: subs progs
+create: subs progs
 
 subs:
-	$(PROG) -m $(MFIL) -d $(TDIR)
+	$(PROG) -m $(MFIL) -d $(TDIR) $(DEBUG)
+
+subs2:
+	$(PROG) -m $(MFIL) -d $(TDIR) $(DEBUG) > t.log
 
 progs:
-	$(PROG) -b $(BDIR) -d $(TDIR) -D
+	$(PROG) -b $(BDIR) -d $(TDIR) $(DEBUG)
