@@ -36,7 +36,7 @@ sub bin2hex(Str:D $bin where &binary, UInt $len = 0)
 - Returns : The input number with commas added, e.g., 1234.56 => 1,234.56
 ```perl6
 sub commify($num) is export(:commify) {#...}
-  
+
 ```
 
 ### count-substrs
@@ -54,7 +54,7 @@ sub count-substrs(Str:D $ip, Str:D $substr)
 - Returns : Binary number (string)
 ```perl6
 sub dec2bin(UInt $dec, UInt $len = 0) returns Str is export(:dec2bin) {#...}
-  
+
 ```
 
 ### dec2hex
@@ -63,7 +63,7 @@ sub dec2bin(UInt $dec, UInt $len = 0) returns Str is export(:dec2bin) {#...}
 - Returns : Hexadecimal number (string)
 ```perl6
 sub dec2hex(UInt $dec, UInt $len = 0) returns Str is export(:dec2hex) {#...}
-  
+
 ```
 
 ### delta-time-hms
@@ -72,7 +72,7 @@ sub dec2hex(UInt $dec, UInt $len = 0) returns Str is export(:dec2hex) {#...}
 - Returns : Time in hms format, e.g, "3h02m02.65s"
 ```perl6
 sub delta-time-hms($Time) returns Str is export(:delta-time-hms) {#...}
-  
+
 ```
 
 ### hex2bin
@@ -135,7 +135,7 @@ sub normalize-string-rw(Str:D $str is rw)
 - Returns : A list or a single value depending upon the presence of the ':$uts' variable
 ```perl6
 sub read-sys-time($time-file, :$uts) {#...}
-  
+
 ```
 
 ### split-line
@@ -173,7 +173,7 @@ sub strip-comment(Str $line is copy, Str $comment-char = '#')
 - Returns : A list of times or user time only
 ```perl6
 sub time-command(Str:D $cmd, :$uts) is export(:time-command) {#...}
-  
+
 ```
 
 ### write-paragraph
