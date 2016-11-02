@@ -10,11 +10,13 @@ I hope they will be useful to others.
 
 The routines are exportable as a set in the following categories:
 
-+ text handling             [export(:text)]
-+ number base conversion    [export(:number)]
-+ process time measurements [export(:time)]
-+ date formatting           [export(:date-format)]
-+ date routines             [export(:date-sub)]
+| Category | Export Tag |
+| :--- | :--- |
+| text handling             | [export(:text)]        |
+| number base conversion    | [export(:number)]      |
+| process time measurements | [export(:time)]        |
+| date formatting           | [export(:date-format)] |
+| date routines             | [export(:date-sub)]    |
 
 The routines are described in more detail in
 [ALL-SUBS](https://github.com/tbrowder/Misc-Utils-Perl6/blob/master/docs/ALL-SUBS.md)
