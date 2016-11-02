@@ -23,6 +23,7 @@
     "resources" : [
     ],
     "tags" : [
-	"miscellaneous", "utility programs", "utility subroutines"
+	"miscellaneous", "utility programs", "utility subroutines",
+	"number conversions", "text handling", "process timing", "date routines"
     ]
 }
