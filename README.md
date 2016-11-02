@@ -6,6 +6,12 @@
 Being a lazy programmer, I refactor chunks of code I find useful into
 a module; whence comes this collection of Perl 6 subroutines I have
 written during my coding adventures using Perl 5's new little sister.
+I hope they will be useful to others.
+
+The routines are described in more detail in
+[ALL-SUBS](https://github.com/tbrowder/Misc-Utils-Perl6/blob/master/docs/ALL-SUBS.md)
+for a list of export(:ALL) subroutines, each with a short description
+along with its complete signature.
 
 This module also includes various utility programs in the bin
 directory.
@@ -35,19 +41,18 @@ MISC_UTILS_DEBUG=1
 
 ## Subroutines Exported by the `:ALL` Tag
 
-```Perl6
-use Misc::Utils :ALL;
-```
-
 See
 [ALL-SUBS](https://github.com/tbrowder/Misc-Utils-Perl6/blob/master/docs/ALL-SUBS.md)
 for a list of export(:ALL) subroutines, each with a short description
 along with its complete signature.
-
 Note that individual subroutines may also be exported:
 
 ```Perl6
 use Misc::Utils :strip-comment;
+```
+
+```Perl6
+use Misc::Utils :ALL;
 ```
 
 ## Utility Programs
