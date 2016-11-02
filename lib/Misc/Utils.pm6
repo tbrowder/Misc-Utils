@@ -418,7 +418,7 @@ multi write-paragraph(IO::Handle:D $fh, Str:D $para is copy , UInt :$max-line-le
 
 #------------------------------------------------------------------------------
 # Subroutine write-paragraph
-# Purpose : Wrap a string of words into a paragraph with a maximum line width (default: 78) and updates input string with the results
+# Purpose : Wrap a string of words into a paragraph with a maximum line width (default: 78) and updates the input string with the results
 # Params  : String of words, max line length, paragraph indent, first line indent, pre-text
 # Returns : Nothing (caution, this routine uses more memory than the output-to-file version)
 multi write-paragraph(Str:D $para is rw, UInt :$max-line-length = 78,
