@@ -10,8 +10,8 @@ I hope they will be useful to others.
 
 The routines are described in more detail in
 [ALL-SUBS](https://github.com/tbrowder/Misc-Utils-Perl6/blob/master/docs/ALL-SUBS.md)
-for a list of export(:ALL) subroutines, each with a short description
-along with its complete signature.
+which shows a short description of each exported routine along along
+with its complete signature.
 
 This module also includes various utility programs in the bin
 directory.
