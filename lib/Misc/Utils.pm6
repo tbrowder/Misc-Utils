@@ -324,16 +324,13 @@ sub commify($num) is export(:commify) {
 #------------------------------------------------------------------------------
 # Subroutine write-paragraph
 # Purpose : Wrap a string of words into a paragraph with a maximum line width (default: 78) and print it to the input file handle
-# Params  : Output file handle, array of words, max line length, paragraph indent, first line indent, pre-text
+# Params  : Output file handle, string of words, max line length, paragraph indent, first line indent, pre-text
 # Returns : Nothing
-sub write-paragraph(IO::Handle:D $fh, @para, UInt :$max-line-length = 78,
-                    UInt :$para-indent = 0, UInt :$first-line-indent = 0,
-                    Str :$pre-text = '') is export(:write-paragraph) {
+multi write-paragraph(IO::Handle:D $fh, Str:D $para is copy , UInt :$max-line-length = 78,
+                      UInt :$para-indent = 0, UInt :$first-line-indent = 0,
+                      Str :$pre-text = '') is export(:write-paragraph) {
 
-    # get a clean array of words to work with
-    my $s = join ' ', @para;
-    say "DEBUG: s = '$s'" if $DEBUG;
-    my @words = $s.words;
+    my @words = $para.words;
     say "DEBUG: words = '@words'" if $DEBUG;
     # calculate the various effective indents and any pre-text effects
     # get the effective first-line indent
@@ -346,6 +343,17 @@ sub write-paragraph(IO::Handle:D $fh, @para, UInt :$max-line-length = 78,
     my $first-line = $pre-text ~ $findent-spaces;
     my $line = $first-line;
 
+    # now do a length check
+    {
+        my $nc = $line.chars;
+        if $nc >= $max-line-length {
+           say "FATAL:  Line length too long ($nc), must be <= \$max-line-length ($max-line-length)";
+           say "line:   '$line'";
+           say "length: $nc";
+           exit 1;
+        }
+    }
+
     my $first-word = True;
     loop {
         if !+@words {
@@ -356,6 +364,17 @@ sub write-paragraph(IO::Handle:D $fh, @para, UInt :$max-line-length = 78,
         my $next = @words[0];
         $next = ' ' ~ $next if !$first-word;
         $first-word = False;
+
+        # now do a length check
+    {
+        my $nc = $next.chars;
+        if $nc > $max-line-length {
+           say "FATAL:  Line length too long ($nc), must be <= \$max-line-length ($max-line-length)";
+           say "line:   '$next'";
+           say "length: $nc";
+           exit 1;
+        }
+    }
 
         if $next.chars + $line.chars <= $max-line-length {
             $line ~= $next;
@@ -398,10 +417,32 @@ sub write-paragraph(IO::Handle:D $fh, @para, UInt :$max-line-length = 78,
 } # write-paragraph
 
 #------------------------------------------------------------------------------
+# Subroutine write-paragraph
+# Purpose : Wrap a string of words into a paragraph with a maximum line width (default: 78) and updates input string with the results
+# Params  : String of words, max line length, paragraph indent, first line indent, pre-text
+# Returns : Nothing (caution, this routine uses more memory than the output-to-file version)
+multi write-paragraph(Str:D $para is rw, UInt :$max-line-length = 78,
+                      UInt :$para-indent = 0, UInt :$first-line-indent = 0,
+                      Str :$pre-text = '') is export(:write-paragraph2) {
+
+    use File::Temp;
+
+    # internal temp file name ($f) and its handle ($fh)
+    my ($f, $fh) = tempfile; # note temp files are opened rw
+    my $s = $para;
+    # do the mods for the para text
+    write-paragraph($fh, $s, :$max-line-length, :$para-indent, :$first-line-indent, :$pre-text);
+
+    # assign the file contents to the incoming text
+    $para = slurp $f;
+
+}
+
+#------------------------------------------------------------------------------
 # Subroutine normalize-string
-# Purpose :
-# Params  :
-# Returns :
+# Purpose : Trim a string and collapse multiple whitespace characters to single ones
+# Params  : The string to be normalized
+# Returns : The normalized string
 sub normalize-string(Str:D $str is copy) returns Str is export(:normalize-string) {
     $str .= trim;
     $str ~~ s:g/ \s ** 2..*/ /;
@@ -410,9 +451,9 @@ sub normalize-string(Str:D $str is copy) returns Str is export(:normalize-string
 
 #------------------------------------------------------------------------------
 # Subroutine normalize-string-rw
-# Purpose :
-# Params  :
-# Returns :
+# Purpose : Trim a string and collapse multiple whitespace characters to single ones
+# Params  : The string to be normalized
+# Returns : Nothing, the input string is normalized in-place
 sub normalize-string-rw(Str:D $str is rw) is export(:normalize-string-rw) {
     $str .= trim;
     $str ~~ s:g/ \s ** 2..*/ /;
@@ -420,9 +461,9 @@ sub normalize-string-rw(Str:D $str is rw) is export(:normalize-string-rw) {
 
 #------------------------------------------------------------------------------
 # Subroutine split-line
-# Purpose :
-# Params  :
-# Returns :
+# Purpose : Split a string into two pieces
+# Params  : String to be split, the split character, maximum length, a starting position for the search, search direction
+# Returns : The two parts of the split string; the second part will be empty string if the input string is not too long
 sub split-line(Str:D $line is copy, Str:D $brk, UInt :$max-line-length = 78,
                UInt :$start-pos = 0, Bool :$rindex = False) returns List is export(:split-line) {
     my $line2 = '';
@@ -449,9 +490,9 @@ sub split-line(Str:D $line is copy, Str:D $brk, UInt :$max-line-length = 78,
 
 #------------------------------------------------------------------------------
 # Subroutine split-line-rw
-# Purpose :
-# Params  :
-# Returns :
+# Purpose : Split a string into two pieces
+# Params  : String to be split, the split character, maximum length, a starting position for the search, search direction
+# Returns : The part of the input string past the break character, or an empty string (the input string is modified in-place if it is too long)
 sub split-line-rw(Str:D $line is rw, Str:D $brk, UInt :$max-line-length = 78,
                   UInt :$start-pos = 0, Bool :$rindex = False) returns Str is export(:split-line-rw) {
     my $line2 = '';
