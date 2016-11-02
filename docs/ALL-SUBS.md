@@ -36,7 +36,7 @@ sub bin2hex(Str:D $bin where &binary, UInt $len = 0)
 - Returns : The input number with commas added, e.g., 1234.56 => 1,234.56
 ```perl6
 sub commify($num) is export(:commify) {#...}
-
+  
 ```
 
 ### count-substrs
@@ -54,7 +54,7 @@ sub count-substrs(Str:D $ip, Str:D $substr)
 - Returns : Binary number (string)
 ```perl6
 sub dec2bin(UInt $dec, UInt $len = 0) returns Str is export(:dec2bin) {#...}
-
+  
 ```
 
 ### dec2hex
@@ -63,7 +63,7 @@ sub dec2bin(UInt $dec, UInt $len = 0) returns Str is export(:dec2bin) {#...}
 - Returns : Hexadecimal number (string)
 ```perl6
 sub dec2hex(UInt $dec, UInt $len = 0) returns Str is export(:dec2hex) {#...}
-
+  
 ```
 
 ### delta-time-hms
@@ -72,7 +72,7 @@ sub dec2hex(UInt $dec, UInt $len = 0) returns Str is export(:dec2hex) {#...}
 - Returns : Time in hms format, e.g, "3h02m02.65s"
 ```perl6
 sub delta-time-hms($Time) returns Str is export(:delta-time-hms) {#...}
-
+  
 ```
 
 ### hex2bin
@@ -112,18 +112,18 @@ sub hexchar2dec(Str:D $hexchar is copy where &hexadecimalchar)
 ```
 
 ### normalize-string
-- Purpose :
-- Params  :
-- Returns :
+- Purpose : Trim a string and collapse multiple whitespace characters to single ones
+- Params  : The string to be normalized
+- Returns : The normalized string
 ```perl6
 sub normalize-string(Str:D $str is copy)
   returns Str is export(:normalize-string) {#...}
 ```
 
 ### normalize-string-rw
-- Purpose :
-- Params  :
-- Returns :
+- Purpose : Trim a string and collapse multiple whitespace characters to single ones
+- Params  : The string to be normalized
+- Returns : Nothing, the input string is normalized in-place
 ```perl6
 sub normalize-string-rw(Str:D $str is rw)
   is export(:normalize-string-rw) {#...}
@@ -135,13 +135,13 @@ sub normalize-string-rw(Str:D $str is rw)
 - Returns : A list or a single value depending upon the presence of the ':$uts' variable
 ```perl6
 sub read-sys-time($time-file, :$uts) {#...}
-
+  
 ```
 
 ### split-line
-- Purpose :
-- Params  :
-- Returns :
+- Purpose : Split a string into two pieces
+- Params  : String to be split, the split character, maximum length, a starting position for the search, search direction
+- Returns : The two parts of the split string; the second part will be empty string if the input string is not too long
 ```perl6
 sub split-line(Str:D $line is copy, Str:D $brk, UInt :$max-line-length = 78,
                UInt :$start-pos = 0, Bool :$rindex = False)
@@ -149,9 +149,9 @@ sub split-line(Str:D $line is copy, Str:D $brk, UInt :$max-line-length = 78,
 ```
 
 ### split-line-rw
-- Purpose :
-- Params  :
-- Returns :
+- Purpose : Split a string into two pieces
+- Params  : String to be split, the split character, maximum length, a starting position for the search, search direction
+- Returns : The part of the input string past the break character, or an empty string (the input string is modified in-place if it is too long)
 ```perl6
 sub split-line-rw(Str:D $line is rw, Str:D $brk, UInt :$max-line-length = 78,
                   UInt :$start-pos = 0, Bool :$rindex = False)
@@ -173,16 +173,10 @@ sub strip-comment(Str $line is copy, Str $comment-char = '#')
 - Returns : A list of times or user time only
 ```perl6
 sub time-command(Str:D $cmd, :$uts) is export(:time-command) {#...}
-
+  
 ```
 
 ### write-paragraph
-- Purpose : Wrap a string of words into a paragraph with a maximum line width (default: 78) and print it to the input file handle
-- Params  : Output file handle, array of words, max line length, paragraph indent, first line indent, pre-text
-- Returns : Nothing
-```perl6
-sub write-paragraph(IO::Handle:D $fh, @para, UInt :$max-line-length = 78,
-                    UInt :$para-indent = 0, UInt :$first-line-indent = 0,
-                    Str :$pre-text = '')
-  is export(:write-paragraph) {#...}
-```
+- Purpose : Wrap a string of words into a paragraph with a maximum line width (default: 78) and updates input string with the results
+- Params  : String of words, max line length, paragraph indent, first line indent, pre-text
+- Returns : Nothing (caution, this routine uses more memory than the output-to-file version)
