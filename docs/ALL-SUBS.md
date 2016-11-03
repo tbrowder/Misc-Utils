@@ -2,16 +2,13 @@
 
 ### Contents
 
-#| Col 1| Col 2| Col 3 |
-#| ---| ---| --- |
-
-| [bin2dec](#bin2dec)| [bin2hex](#bin2hex)| [commify](#commify) |
-| [count-substrs](#count-substrs)| [dec2bin](#dec2bin)| [dec2hex](#dec2hex) |
-| [delta-time-hms](#delta-time-hms)| [hex2bin](#hex2bin)| [hex2dec](#hex2dec) |
-| [hexchar2bin](#hexchar2bin)| [hexchar2dec](#hexchar2dec)| [normalize-string](#normalize-string) |
-| [normalize-string-rw](#normalize-string-rw)| [read-sys-time](#read-sys-time)| [split-line](#split-line) |
-| [split-line-rw](#split-line-rw)| [strip-comment](#strip-comment)| [time-command](#time-command) |
-| [write-paragraph](#write-paragraph)| |  |
+| [bin2dec](#bin2dec) | [bin2hex](#bin2hex)| [commify](#commify) |
+| [count-substrs](#count-substrs) | [dec2bin](#dec2bin)| [dec2hex](#dec2hex) |
+| [delta-time-hms](#delta-time-hms) | [hex2bin](#hex2bin)| [hex2dec](#hex2dec) |
+| [hexchar2bin](#hexchar2bin) | [hexchar2dec](#hexchar2dec)| [normalize-string](#normalize-string) |
+| [normalize-string-rw](#normalize-string-rw) | [read-sys-time](#read-sys-time)| [split-line](#split-line) |
+| [split-line-rw](#split-line-rw) | [strip-comment](#strip-comment)| [time-command](#time-command) |
+| [write-paragraph](#write-paragraph) | |  |
 
 ### bin2dec
 - Purpose : Convert a binary number (string) to a decimal number
