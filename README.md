@@ -10,8 +10,8 @@ I hope they will be useful to others.
 
 The routines are exportable as a set in the following categories:
 
-| Category | Export Tag | Possible Future Module
-| :--- | :--- | :--- |
+| Category                  | Export Tag             | Possible Future Module | 
+| :---                      | :---                   | :---                   |
 | text handling             | [export(:text)]        | Text::More             |
 | number base conversion    | [export(:number)]      | Number::More           |
 | process time measurements | [export(:time)]        | Linux::Proc::Time      |
