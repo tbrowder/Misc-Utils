@@ -10,10 +10,10 @@ I hope they will be useful to others.
 
 The routines are exportable as a set in the following categories:
 
-| Category                  | Export Tag             | Possible Future Module | 
+| Category                  | Export Tag             | Possible Future Module |
 | :---                      | :---                   | :---                   |
-| text handling             | [export(:text)]        | Text::More             |
 | number base conversion    | [export(:number)]      | Number::More           |
+| text handling             | [export(:text)]        | Text::More             |
 | process time measurements | [export(:time)]        | Linux::Proc::Time      |
 | date formatting           | [export(:date-format)] | DateTime::Format::More |
 | date routines             | [export(:date-sub)]    | DateTime::Math::More   |
