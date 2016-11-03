@@ -2,8 +2,9 @@
 
 ### Contents
 
-| Col 1| Col 2| Col 3 |
-| ---| ---| --- |
+#| Col 1| Col 2| Col 3 |
+#| ---| ---| --- |
+
 | [bin2dec](#bin2dec)| [bin2hex](#bin2hex)| [commify](#commify) |
 | [count-substrs](#count-substrs)| [dec2bin](#dec2bin)| [dec2hex](#dec2hex) |
 | [delta-time-hms](#delta-time-hms)| [hex2bin](#hex2bin)| [hex2dec](#hex2dec) |
