@@ -464,7 +464,7 @@ sub normalize-string-rw(Str:D $str is rw) is export(:normalize-string-rw) {
 # Purpose : Split a string into two pieces
 # Params  : String to be split, the split character, maximum length, a starting position for the search, search direction
 # Returns : The two parts of the split string; the second part will be empty string if the input string is not too long
-sub split-line(Str:D $line is copy, Str:D $brk, UInt :$max-line-length = 78,
+sub split-line(Str:D $line is copy, Str:D $brk, UInt :$max-line-length = 0,
                UInt :$start-pos = 0, Bool :$rindex = False) returns List is export(:split-line) {
     my $line2 = '';
     return ($line, $line2) if $max-line-length && $line.chars <= $max-line-length;
@@ -481,8 +481,8 @@ sub split-line(Str:D $line is copy, Str:D $brk, UInt :$max-line-length = 78,
         $line2 = substr $line, $idx+1;
         $line  = substr $line, 0, $idx+1;
 
-        $line  .= trim-trailing;
-        $line2 .= trim;
+        #$line  .= trim-trailing;
+        #$line2 .= trim;
     }
     return ($line, $line2);
 
@@ -493,7 +493,7 @@ sub split-line(Str:D $line is copy, Str:D $brk, UInt :$max-line-length = 78,
 # Purpose : Split a string into two pieces
 # Params  : String to be split, the split character, maximum length, a starting position for the search, search direction
 # Returns : The part of the input string past the break character, or an empty string (the input string is modified in-place if it is too long)
-sub split-line-rw(Str:D $line is rw, Str:D $brk, UInt :$max-line-length = 78,
+sub split-line-rw(Str:D $line is rw, Str:D $brk, UInt :$max-line-length = 0,
                   UInt :$start-pos = 0, Bool :$rindex = False) returns Str is export(:split-line-rw) {
     my $line2 = '';
     return $line2 if $max-line-length && $line.chars <= $max-line-length;
@@ -510,8 +510,8 @@ sub split-line-rw(Str:D $line is rw, Str:D $brk, UInt :$max-line-length = 78,
         $line2 = substr $line, $idx+1;
         $line  = substr $line, 0, $idx+1;
 
-        $line  .= trim-trailing;
-        $line2 .= trim;
+        #$line  .= trim-trailing;
+        #$line2 .= trim;
     }
     return $line2;
 

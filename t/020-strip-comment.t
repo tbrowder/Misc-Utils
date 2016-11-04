@@ -3,7 +3,7 @@ use Test;
 
 use Misc::Utils :ALL;
 
-plan 4;
+plan 8;
 
 my (@s, @stripped);
 # comment char is default '#'
