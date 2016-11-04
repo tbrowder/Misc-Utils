@@ -2,6 +2,10 @@
 REQUIREMENTS FOR INITIAL, BETA RELEASE
 ======================================
 
+handle multi subs
+
+add the help text
+
 enable folding sub lines to max-line-length
 
 incorporate suitable subs from all my p6 programs
@@ -21,7 +25,7 @@ REQUIREMENTS FOR NEXT RELEASE
 ======================================
 
 allow multi-line text following a keyword
-  consider ending wither with either: a blank line, another keyword line,
+  consider ending whether with either: a blank line, another keyword line,
   an explicit comment line ("# end:"), or a non-comment line
 
 use DateTime::Math for date functions

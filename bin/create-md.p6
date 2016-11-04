@@ -143,14 +143,18 @@ if $modfil {
 	$fh.say: %mdfils{$f}<title>;
 
 	my %hs = %(%mdfils{$f}<subs>);
-	my @subs = %hs.keys.sort;
+	# keys are nominally the sub name, but may have a number
+        # appended in the case of multi-subs
+	my @subids = %hs.keys.sort; 
 
         # need to make a TOC
-        create-toc-md($fh, 'Contents', @subs, 3, :add-link(True));
+        create-toc-md($fh, 'Contents', @subids, 3, :add-link(True));
 
-	for @subs -> $s {
-            say "sub: $s" if $debug;
-            my @lines = @(%hs{$s});
+	for @subids -> $s {
+            say "subid: $s" if $debug;
+            my $sub = %hs{$s}<name>;
+            $fh.say: $sub;
+            my @lines = @(%hs{$s}<lines>);
             for @lines -> $line {
 		$fh.say: $line;
             }
@@ -253,7 +257,7 @@ sub create-bin-md($d) {
 
                     if $kw eq 'Help' && $val ~~ /:i y/ {
                         # generate the help text
-                        say 'Tom: fix this with a sub, add text';
+                        say 'TODO: fix this with a sub, add text';
                         %binfils{$program}.push(get-help-lines($f));
                     }
 		}
@@ -267,12 +271,14 @@ sub create-bin-md($d) {
 
 sub get-help-lines($prog) {
     return 'FINISH THE GET HELP SUB';
-} # get- help-lines
+} # get-help-lines
 
 sub create-subs-md($f) {
     # HANDLES MODULES
 
     # %h{$fname}<title> = $title
+    #           <subs>{$subid}<name>  = $subname
+    #           <subs>{$subid}<lines> = @lines
     #           <subs>{$subname} = @lines
 
     my $fname;   # current output file name
@@ -306,20 +312,28 @@ sub create-subs-md($f) {
                 $fname = $val;
             }
             elsif $kw eq 'title:' {
-                # update the title name
+                # update the file's title name
                 $title = $txt;
                 %mdfils{$fname}<title> = $title;
             }
             elsif $kw eq 'Subroutine' {
-                # update the subroutine name
-                $subname = $val;
-                # start a new array
-                %mdfils{$fname}<subs>{$subname} = [];
-                %mdfils{$fname}<subs>{$subname}.push($txt);
+                die "fix this code block for sub handling";
+                # update the subroutine name (may be a multi name, special handling)
+                my $subname = $val;
+                $subid = $subname;
+                if %mdfils{$fname}<subs>{$subid}:exists {
+                    say "CREATE NEW SUB ID FOR MULTI";
+                    $subid = get-multi-id($subid);
+                }
+                 
+                # start a new sub entry with name and lines array
+                %mdfils{$fname}<subs>{$subid}<name>  = $subname;
+                %mdfils{$fname}<subs>{$subid}<lines> = [];
+                %mdfils{$fname}<subs>{$subid}<lines>.push($txt);
             }
             else {
                 # all other lines go onto the array
-                %mdfils{$fname}<subs>{$subname}.push($txt);
+                %mdfils{$fname}<subs>{$subid}<lines>.push($txt);
             }
         }
         elsif $line ~~ /^ sub \s* / {
@@ -530,7 +544,16 @@ sub get-kw-line-data(:$val, :$kw, :@words is copy) returns Str {
     return $txt;
 }
 
+sub create-loc-md($fh, $title, @list is copy, $ncols, :$add-link) {
+    # note this creates a list of contents, not as pretty as a table
+    # but it doesn't have the mandatory column headings
+} # create-loc-md
+
 sub create-toc-md($fh, $title, @list is copy, $ncols, :@headings, :@just, :$add-link) {
+    # note this creates a table with a clunky set of column headers which are required
+    # due to githubs limited flavor of markdown (I've filed an issue with github
+    # and they've acknowledged it [2016-11-04])
+
     my $ne = @list.elems;
     my $nrows = $ne div $ncols;
     ++$nrows if $ne % $ncols; # check for partial columns
@@ -546,9 +569,9 @@ sub create-toc-md($fh, $title, @list is copy, $ncols, :@headings, :@just, :$add-
         # need 2 loops
         # column headings
         for @headings -> $h {
-            $fh.print: "| $h";
+            $fh.print: "| $h ";
         }
-        $fh.say: ' |';
+        $fh.say: '|';
 
         # the heading separator row
         for 0..^$ncols -> $i {
@@ -560,25 +583,25 @@ sub create-toc-md($fh, $title, @list is copy, $ncols, :@headings, :@just, :$add-
 		    when /:i R/ { $b ~= ':'     }
                 }
             }
-            $fh.print: "| $b";
+            $fh.print: "| $b ";
         }
-        $fh.say: ' |';
+        $fh.say: '|';
     }
     # note that at the moment github markdown requires column headings
     else {
         # need 2 loops
         # column headings
         for 1..$ncols -> $n {
-            $fh.print: "| Col $n";
+            $fh.print: "| Col $n ";
         }
-        $fh.say: ' |';
+        $fh.say: '|';
 
         # the heading separator row
         for 0..^$ncols -> $i {
             my $b = '---';
-            $fh.print: "| $b";
+            $fh.print: "| $b ";
         }
-        $fh.say: ' |';
+        $fh.say: '|';
     }
 
     # add the table content
@@ -588,12 +611,12 @@ sub create-toc-md($fh, $title, @list is copy, $ncols, :@headings, :@just, :$add-
             if $c && $add-link {
                 # add the link
                 my $link = '#' ~ lc $c;
-                $fh.print: "| [$c]($link)";
+                $fh.print: "| [$c]($link) ";
             }
             else {
-                $fh.print: "| $c";
+                $fh.print: "| $c ";
             }
         }
-        $fh.say: ' |';
+        $fh.say: '|';
     }
 }

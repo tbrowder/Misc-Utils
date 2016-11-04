@@ -193,7 +193,7 @@ sub bin2hex(Str:D $bin where &binary, UInt $len = 0) returns Str is export(:bin2
 # Subroutine strip-comment
 # Purpose : Strip comments from an input text line
 # Params  : String of text, comment char ('#' is default)
-# Returns : String of text with any comment stripped off
+# Returns : String of text with any comment stripped off. Note that char will trigger the strip even though it is escaped or included in quotes.
 sub strip-comment(Str $line is copy, Str $comment-char = '#') returns Str is export(:strip-comment) {
     my $idx = index $line, $comment-char;
     if $idx.defined {
