@@ -3,7 +3,7 @@ use Test;
 
 use Misc::Utils :ALL;
 
-plan 17;
+plan 14;
 
 # base conversions
 is hexchar2dec('a'), 10;
@@ -26,8 +26,3 @@ is hex2bin('ff', 10), '0011111111';
 
 is dec2bin(10), '1010';
 is dec2bin(10, 5), '01010';
-
-# miscellaneous
-is count-substrs('23:::', '::'), 2;
-is count-substrs('d:efa33:23:::', ':'), 5;
-is count-substrs('d-:efa33:23:-::', '-:'), 2;
