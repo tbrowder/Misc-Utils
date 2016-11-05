@@ -326,9 +326,11 @@ sub commify($num) is export(:commify) {
 # Purpose : Wrap a list of words into a paragraph with a maximum line width (default: 78) and print it to the input file handle
 # Params  : Output file handle, list of words, max line length, paragraph indent, first line indent, pre-text
 # Returns : Nothing
-multi write-paragraph(IO::Handle:D $fh, List:D @words is copy , UInt :$max-line-length = 78,
+multi write-paragraph(IO::Handle:D $fh, Str @Words, UInt :$max-line-length = 78,
                       UInt :$para-indent = 0, UInt :$first-line-indent = 0,
                       Str :$pre-text = '') is export(:write-paragraph) {
+
+    my @words = @Words;
 
     say "DEBUG: words = '@words'" if $DEBUG;
     # calculate the various effective indents and any pre-text effects
@@ -420,7 +422,7 @@ multi write-paragraph(IO::Handle:D $fh, List:D @words is copy , UInt :$max-line-
 # Purpose : Wrap a list of words into a paragraph with a maximum line width (default: 78) and updates the input list with the results
 # Params  : List of words, max line length, paragraph indent, first line indent, pre-text
 # Returns : Nothing (caution, this routine uses more memory than the output-to-file version)
-multi write-paragraph(List:D @words, UInt :$max-line-length = 78,
+multi write-paragraph(Str @words, UInt :$max-line-length = 78,
                       UInt :$para-indent = 0, UInt :$first-line-indent = 0,
                       Str :$pre-text = '') is export(:write-paragraph2) {
 
