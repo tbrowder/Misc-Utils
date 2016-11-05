@@ -323,14 +323,13 @@ sub commify($num) is export(:commify) {
 
 #------------------------------------------------------------------------------
 # Subroutine write-paragraph
-# Purpose : Wrap a string of words into a paragraph with a maximum line width (default: 78) and print it to the input file handle
-# Params  : Output file handle, string of words, max line length, paragraph indent, first line indent, pre-text
+# Purpose : Wrap a list of words into a paragraph with a maximum line width (default: 78) and print it to the input file handle
+# Params  : Output file handle, list of words, max line length, paragraph indent, first line indent, pre-text
 # Returns : Nothing
-multi write-paragraph(IO::Handle:D $fh, Str:D $para is copy , UInt :$max-line-length = 78,
+multi write-paragraph(IO::Handle:D $fh, List:D @words is copy , UInt :$max-line-length = 78,
                       UInt :$para-indent = 0, UInt :$first-line-indent = 0,
                       Str :$pre-text = '') is export(:write-paragraph) {
 
-    my @words = $para.words;
     say "DEBUG: words = '@words'" if $DEBUG;
     # calculate the various effective indents and any pre-text effects
     # get the effective first-line indent
@@ -418,10 +417,10 @@ multi write-paragraph(IO::Handle:D $fh, Str:D $para is copy , UInt :$max-line-le
 
 #------------------------------------------------------------------------------
 # Subroutine write-paragraph
-# Purpose : Wrap a string of words into a paragraph with a maximum line width (default: 78) and updates the input string with the results
-# Params  : String of words, max line length, paragraph indent, first line indent, pre-text
+# Purpose : Wrap a list of words into a paragraph with a maximum line width (default: 78) and updates the input list with the results
+# Params  : List of words, max line length, paragraph indent, first line indent, pre-text
 # Returns : Nothing (caution, this routine uses more memory than the output-to-file version)
-multi write-paragraph(Str:D $para is rw, UInt :$max-line-length = 78,
+multi write-paragraph(List:D @words, UInt :$max-line-length = 78,
                       UInt :$para-indent = 0, UInt :$first-line-indent = 0,
                       Str :$pre-text = '') is export(:write-paragraph2) {
 
@@ -429,13 +428,12 @@ multi write-paragraph(Str:D $para is rw, UInt :$max-line-length = 78,
 
     # internal temp file name ($f) and its handle ($fh)
     my ($f, $fh) = tempfile; # note temp files are opened rw
-    my $s = $para;
+
     # do the mods for the para text
-    write-paragraph($fh, $s, :$max-line-length, :$para-indent, :$first-line-indent, :$pre-text);
+    write-paragraph($fh, @words, :$max-line-length, :$para-indent, :$first-line-indent, :$pre-text);
 
     # assign the file contents to the incoming text
-    $para = slurp $f;
-
+    @words = (slurp $f).lines;
 }
 
 #------------------------------------------------------------------------------

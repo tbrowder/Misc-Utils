@@ -6,14 +6,14 @@ use Misc::Utils :ALL;
 plan 18;
 
 # input: 10 five-letter words in a string
-my $para = ' words';
+my @words = ' words';
 for 1..^10 -> $i {
     my $s = ' ' x $i;
     $s ~= 'words';
-    $para ~= $s;
+    @words.append: $s;
 }
-$para ~= ' ';
-say "input para words = '$para'";
+@words.append: ' ';
+say "input para words = '{@words}'";
 
 my $f = '.tmp-030';
 
@@ -26,7 +26,7 @@ my ($fh, $p1);
 # test 1
 {
     $fh = open $f, :w;
-    write-paragraph($fh, $para, :max-line-length(30));
+    write-paragraph($fh, @words, :max-line-length(30));
     $p1 =
     "words words words words words\n" ~
     "words words words words words\n";
@@ -37,7 +37,7 @@ my ($fh, $p1);
 # test 2
 {
     $fh = open $f, :w;
-    write-paragraph($fh, $para, :max-line-length(24));
+    write-paragraph($fh, @words, :max-line-length(24));
     $p1 =
     "words words words words\n" ~
     "words words words words\n" ~
@@ -50,7 +50,7 @@ my ($fh, $p1);
 # test 3
 {
     $fh = open $f, :w;
-    write-paragraph($fh, $para, :max-line-length(20));
+    write-paragraph($fh, @words, :max-line-length(20));
     $p1 =
     "words words words\n" ~
     "words words words\n" ~
@@ -63,7 +63,7 @@ my ($fh, $p1);
 # test 4
 {
     $fh = open $f, :w;
-    write-paragraph($fh, $para, :max-line-length(38), :pre-text('topic:  '));
+    write-paragraph($fh, @words, :max-line-length(38), :pre-text('topic:  '));
     $p1 =
     "topic:  words words words words words\n" ~
     "        words words words words words\n";
@@ -74,7 +74,7 @@ my ($fh, $p1);
 # test 5
 {
     $fh = open $f, :w;
-    write-paragraph($fh, $para, :max-line-length(30), :first-line-indent(3));
+    write-paragraph($fh, @words, :max-line-length(30), :first-line-indent(3));
     $p1 =
     "   words words words words\n" ~
     "words words words words words\n" ~
@@ -86,7 +86,7 @@ my ($fh, $p1);
 # test 6
 {
     $fh = open $f, :w;
-    write-paragraph($fh, $para, :max-line-length(33), :first-line-indent(3),
+    write-paragraph($fh, @words, :max-line-length(33), :first-line-indent(3),
 		    :para-indent(5));
     $p1 =
     "   words words words words words\n" ~
@@ -99,7 +99,7 @@ my ($fh, $p1);
 # test 7
 {
     $fh = open $f, :w;
-    write-paragraph($fh, $para, :max-line-length(33), :first-line-indent(5),
+    write-paragraph($fh, @words, :max-line-length(33), :first-line-indent(5),
 		    :para-indent(3));
     $p1 =
     "     words words words words\n" ~
@@ -112,7 +112,7 @@ my ($fh, $p1);
 # test 8
 {
     $fh = open $f, :w;
-    write-paragraph($fh, $para, :pre-text('text: '), :max-line-length(39),
+    write-paragraph($fh, @words, :pre-text('text: '), :max-line-length(39),
 		    :first-line-indent(5), :para-indent(3));
     $p1 =
     "text:      words words words words\n" ~
@@ -127,23 +127,26 @@ my ($fh, $p1);
 
 # test 9 (compare with 1)
 {
-    my $pin = $para;
-    write-paragraph($pin, :max-line-length(30));
+    my @pin = @words;
+    write-paragraph(@pin, :max-line-length(30));
     $p1 =
     "words words words words words\n" ~
     "words words words words words\n";
 
+    my $pin = join ' ', @pin;
     is $pin, $p1;
 }
 
 # test 10 (compare with 2)
 {
-    my $pin = $para;
-    write-paragraph($pin, :max-line-length(24));
+    my @pin = @words;
+    write-paragraph(@pin, :max-line-length(24));
     $p1 =
     "words words words words\n" ~
     "words words words words\n" ~
     "words words\n";
+
+    my $pin = join ' ', @pin;
 
     is $pin, $p1;
 }
@@ -151,76 +154,82 @@ my ($fh, $p1);
 
 # test 11 (compare with 3)
 {
-    my $pin = $para;
-    write-paragraph($pin, :max-line-length(20));
+    my @pin = @words;
+    write-paragraph(@pin, :max-line-length(20));
     $p1 =
     "words words words\n" ~
     "words words words\n" ~
     "words words words\n" ~
     "words\n";
 
+    my $pin = join ' ', @pin;
     is $pin, $p1;
 }
 
 # test 12 (compare with 4)
 {
-    my $pin = $para;
-    write-paragraph($pin, :max-line-length(38), :pre-text('topic:  '));
+    my @pin = @words;
+    write-paragraph(@pin, :max-line-length(38), :pre-text('topic:  '));
     $p1 =
     "topic:  words words words words words\n" ~
     "        words words words words words\n";
 
+    my $pin = join ' ', @pin;
     is $pin, $p1;
 }
 
 # test 13 (compare with 5)
 {
-    my $pin = $para;
-    write-paragraph($pin, :max-line-length(30), :first-line-indent(3));
+    my @pin = @words;
+    write-paragraph(@pin, :max-line-length(30), :first-line-indent(3));
     $p1 =
     "   words words words words\n" ~
     "words words words words words\n" ~
     "words\n";
 
+    my $pin = join ' ', @pin;
     is $pin, $p1;
 }
 
 # test 14 (compare with 6)
 {
-    my $pin = $para;
-    write-paragraph($pin, :max-line-length(33), :first-line-indent(3),
+    my @pin = @words;
+    write-paragraph(@pin, :max-line-length(33), :first-line-indent(3),
 		    :para-indent(5));
     $p1 =
     "   words words words words words\n" ~
     "     words words words words\n" ~
     "     words\n";
 
+    my $pin = join ' ', @pin;
     is $pin, $p1;
 }
 
 # test 15 (compare with 7)
 {
-    my $pin = $para;
-    write-paragraph($pin, :max-line-length(33), :first-line-indent(5),
+    my @pin = @words;
+    write-paragraph(@pin, :max-line-length(33), :first-line-indent(5),
 		    :para-indent(3));
     $p1 =
     "     words words words words\n" ~
     "   words words words words words\n" ~
     "   words\n";
 
+    my $pin = join ' ', @pin;
     is $pin, $p1;
 }
 
 # test 16 (compare with 3)
 {
-    my $pin = $para;
-    write-paragraph($pin, :pre-text('text: '), :max-line-length(39),
+    my @pin = @words;
+    write-paragraph(@pin, :pre-text('text: '), :max-line-length(39),
 		    :first-line-indent(5), :para-indent(3));
     $p1 =
     "text:      words words words words\n" ~
     "         words words words words words\n" ~
     "         words\n";
 
+    my $pin = join ' ', @pin;
     is $pin, $p1;
 }
 
@@ -238,11 +247,12 @@ my $para2 = '023456789012345678901234567890';
 }
 # test 18 (compare with 17)
 {
-    my $pin = $para2;
-    write-paragraph($pin, :max-line-length(30));
+    my @pin = $para2;
+    write-paragraph(@pin, :max-line-length(30));
     $p1 =
     "023456789012345678901234567890\n\n";
 
+    my $pin = join ' ', @pin;
     is $pin, $p1, "line reported too long";
 }
 

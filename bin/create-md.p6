@@ -145,7 +145,7 @@ if $modfil {
 	my %hs = %(%mdfils{$f}<subs>);
 	# keys are nominally the sub name, but may have a number
         # appended in the case of multi-subs
-	my @subids = %hs.keys.sort; 
+	my @subids = %hs.keys.sort;
 
         # need to make a TOC
         create-toc-md($fh, 'Contents', @subids, 3, :add-link(True));
@@ -273,6 +273,46 @@ sub get-help-lines($prog) {
     return 'FINISH THE GET HELP SUB';
 } # get-help-lines
 
+sub get-multi-id($name) {
+    # return a unique id based on the input name and a single digit suffix (2-9)
+    # routine will have to be modified if more than 9 multi sub names are needed
+    static %names = SetHash.new;
+
+    if !%names{$name} {
+        %names{$name} = 1;
+        return $name;
+    }
+
+    # we have a duplicate, get the next in line
+    my $basename;
+    my $n;
+    if $name ~~ /^ (\.*) (\d) $/ {
+	$basename = ~$0;
+	$n        = +$1;
+    }
+
+    if !$n.defined {
+	# add a 2;
+	$digit = '2';
+	$name = $basename ~ $n;
+	die "FATAL: unexpected existing name '$name'" if %names{$name};
+	%names{$name} = 1;
+	return $name;
+    }
+
+    # more work to do
+    while %names{$basename ~ $n} {
+        ++$n;
+    }
+    die "FATAL: need a fix here: \$n = '$n', \$name = '$name'" if $n > 9;
+
+    $name = $basename ~ $n;
+    die "FATAL: unexpected existing name '$name'" if %names{$name};
+    %names{$name} = 1;
+    return $name;
+
+} # get-multi-id
+
 sub create-subs-md($f) {
     # HANDLES MODULES
 
@@ -283,7 +323,7 @@ sub create-subs-md($f) {
 
     my $fname;   # current output file name
     my $title;   # current title for the file contents
-    my $subname; # current sub name
+    my $subid;   # current sub index
 
     # open the desired module file
     my $fp = open $f;
@@ -325,7 +365,7 @@ sub create-subs-md($f) {
                     say "CREATE NEW SUB ID FOR MULTI";
                     $subid = get-multi-id($subid);
                 }
-                 
+
                 # start a new sub entry with name and lines array
                 %mdfils{$fname}<subs>{$subid}<name>  = $subname;
                 %mdfils{$fname}<subs>{$subid}<lines> = [];
@@ -369,23 +409,23 @@ sub create-subs-md($f) {
             }
 
             # tidy the line into two (or more) lines (unless user declines)
-            @sublines = fold-sub-lines(@sublines, $subname) if !$nofold;
+            @sublines = fold-sub-lines(@sublines, $subid) if !$nofold;
 
             # push lines on the current element
             say "DEBUG: sub sig lines" if $debug;
             # need a line to indicate perl 6 code
-            %mdfils{$fname}<subs>{$subname}.push: '```perl6';
+            %mdfils{$fname}<subs>{$subid}<lines>.push: '```perl6';
             for @sublines -> $line {
-                %mdfils{$fname}<subs>{$subname}.push: $line;
+                %mdfils{$fname}<subs>{$subid}<lines>.push: $line;
                 say "  line: '$line'" if $debug;
             }
             # need a line to indicate end of perl 6 code
-            %mdfils{$fname}<subs>{$subname}.push: '```';
+            %mdfils{$fname}<subs>{$subid}<lines>.push: '```';
         }
     }
 } # create-subs-md
 
-sub fold-sub-lines(@sublines, $subname) returns List {
+sub fold-sub-lines(@sublines, $subid) returns List {
     # get one long string to start with
     my $sig = normalize-string(join ' ', @sublines);
 
@@ -445,7 +485,7 @@ sub fold-sub-lines(@sublines, $subname) returns List {
             $s2 = '';
         }
         if $debug {
-            say "DEBUG: in sub $subname, @tlines:";
+            say "DEBUG: in sub $subid, @tlines:";
             say "  lines:";
             say "    $_" for @tlines;
         }
@@ -462,12 +502,12 @@ sub fold-sub-lines(@sublines, $subname) returns List {
     # sanity check
     my ($maxlen, $maxidx) = analyze-line-lengths(@lines);
     if $maxlen > $max-line-length {
-        say "WARNING: in sub $subname: maxlen = $maxlen, maxidx = $maxidx";
+        say "WARNING: in sub $subid: maxlen = $maxlen, maxidx = $maxidx";
         say "  lines:";
         say "    $_" for @lines;
     }
     # return the folded lines
-    say "NOTE:  sub '$subname' lines were folded" if $verbose;
+    say "NOTE:  sub '$subid' lines were folded" if $verbose;
     return @lines;
 
 }
@@ -544,9 +584,30 @@ sub get-kw-line-data(:$val, :$kw, :@words is copy) returns Str {
     return $txt;
 }
 
-sub create-loc-md($fh, $title, @list is copy, $ncols, :$add-link) {
-    # note this creates a list of contents, not as pretty as a table
+sub create-loc-md($fh, $title, @list is copy, UInt :$nitems = 0,
+                  Bool :$add-link = True, UInt :$max-line-length = 78) {
+    # note this creates a list of contents, not as pretty as a table,
     # but it doesn't have the mandatory column headings
+    my $ne = @list.elems;
+    my $nrows = $ne div $nitems;
+    ++$nrows if $ne % $nitems; # check for partial rows
+
+    $fh.say: "\n### $title\n";
+
+    for 0..^$nrows {
+        for 0..^$nitems {
+            my $c = @list.elems ?? @list.shift !! '';
+            if $c && $add-link {
+                # add the link
+                my $link = '#' ~ lc $c;
+                $fh.print: "| [$c]($link) ";
+            }
+            else {
+                $fh.print: "| $c ";
+            }
+        }
+        $fh.say: '|';
+    }
 } # create-loc-md
 
 sub create-toc-md($fh, $title, @list is copy, $ncols, :@headings, :@just, :$add-link) {
@@ -619,4 +680,4 @@ sub create-toc-md($fh, $title, @list is copy, $ncols, :@headings, :@just, :$add-
         }
         $fh.say: '|';
     }
-}
+} # create-toc-md

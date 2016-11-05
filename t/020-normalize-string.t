@@ -19,10 +19,10 @@ is normalize-string($str3), $n;
 is normalize-string($str4), $n;
 
 # normalize the strings in place
-normalize-string-rw($str1), $n;
-normalize-string-rw($str2), $n;
-normalize-string-rw($str3), $n;
-normalize-string-rw($str4), $n;
+$str1 .= &normalize-string;
+$str2 .= &normalize-string;
+$str3 .= &normalize-string;
+$str4 .= &normalize-string;
 is $str1, $n;
 is $str2, $n;
 is $str3, $n;
