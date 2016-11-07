@@ -10,13 +10,14 @@ I hope they will be useful to others.
 
 The routines are exportable as a set in the following categories:
 
-| Category                  | Export Tag             | Possible Future Module |
-| :---                      | :---                   | :---                   |
-| number base conversion    | [export(:number)]      | Number::More           |
-| text handling             | [export(:text)]        | Text::More             |
-| process time measurements | [export(:time)]        | Linux::Proc::Time      |
-| date formatting           | [export(:date-format)] | DateTime::Format::More |
-| date routines             | [export(:date-sub)]    | DateTime::Math::More   |
+| Category                    | Export Tag             | Possible Future Module |
+| :---                        | :---                   | :---                   |
+| number base conversion      | [export(:number)]      | Number::More           |
+| text handling               | [export(:text)]        | Text::More             |
+| process time measurements   | [export(:time)]        | Linux::Proc::Time      |
+| date formatting             | [export(:date-format)] | DateTime::Format::More |
+| date routines               | [export(:date-sub)]    | DateTime::Math::More   |
+| file and directory routines | [export(:files-dirs)]  | File::Find::More   |
 
 The routines are described in more detail in
 [ALL-SUBS](https://github.com/tbrowder/Misc-Utils-Perl6/blob/master/docs/ALL-SUBS.md)
