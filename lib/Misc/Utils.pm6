@@ -309,7 +309,7 @@ sub commify($num) is export(:commify) {
     say "DEBUG: input '$num'" if $DEBUG;
     my $text = $num.flip;
     say "DEBUG: input flipped '$text'" if $DEBUG;
-    #$text =~ s:g/(\d\d\d)(?=\d)(?!\d*\.)/$0,/; # how to do in Perl 6?
+    #$text =~ s:g/ (\d\d\d)(?=\d)(?!\d*\.)/$0,/; # how to do in Perl 6?
 
     $text ~~ s:g/ (\d\d\d) <?before \d> <!before \d*\.> /$0,/;
 
@@ -323,16 +323,16 @@ sub commify($num) is export(:commify) {
 
 #------------------------------------------------------------------------------
 # Subroutine write-paragraph
-# Purpose : Wrap a list of words into a paragraph with a maximum line width (default: 78) and print it to the input file handle
-# Params  : Output file handle, list of words, max line length, paragraph indent, first line indent, pre-text
-# Returns : Nothing
-multi write-paragraph(IO::Handle:D $fh, Str @Words, UInt :$max-line-length = 78,
-                      UInt :$para-indent = 0, UInt :$first-line-indent = 0,
-                      Str :$pre-text = '') is export(:write-paragraph) {
+# Purpose : Wrap a list of words into a paragraph with a maximum line width (default: 78) and updates the input list with the results
+# Params  : List of words, max line length, paragraph indent, first line indent, pre-text
+# Returns : List of formatted paragraph lines
+multi write-paragraph(@text,
+		      UInt :$max-line-length = 78,
+                      UInt :$para-indent = 0,
+		      UInt :$first-line-indent = 0,
+                      Str :$pre-text = '') returns List is export(:write-paragraph) {
 
-    my @words = @Words;
-
-    say "DEBUG: words = '@words'" if $DEBUG;
+    #say "DEBUG: text = '@text'" if $DEBUG;
     # calculate the various effective indents and any pre-text effects
     # get the effective first-line indent
     my $findent = $first-line-indent ?? $first-line-indent !! $para-indent;
@@ -347,18 +347,22 @@ multi write-paragraph(IO::Handle:D $fh, Str @Words, UInt :$max-line-length = 78,
     # now do a length check
     {
         my $nc = $line.chars;
-        if $nc >= $max-line-length {
-           say "FATAL:  Line length too long ($nc), must be <= \$max-line-length ($max-line-length)";
-           say "line:   '$line'";
-           say "length: $nc";
-           exit 1;
+        if $nc > $max-line-length {
+            say "FATAL:  Line length too long ($nc), must be <= \$max-line-length ($max-line-length)";
+            say "line:   '$line'";
+            die "length: $nc";
         }
     }
 
+    # get all the words
+    my @words = (join ' ', @text).words;
+
+    my @para = ();
     my $first-word = True;
     loop {
-        if !+@words {
-            $fh.say: $line;
+        if !@words.elems {
+            @para.push: $line if $line;
+            #@para.push: $line;
             last;
         }
 
@@ -366,16 +370,15 @@ multi write-paragraph(IO::Handle:D $fh, Str @Words, UInt :$max-line-length = 78,
         $next = ' ' ~ $next if !$first-word;
         $first-word = False;
 
-        # now do a length check
-    {
-        my $nc = $next.chars;
-        if $nc > $max-line-length {
-           say "FATAL:  Line length too long ($nc), must be <= \$max-line-length ($max-line-length)";
-           say "line:   '$next'";
-           say "length: $nc";
-           exit 1;
+        # do a length check
+	{
+            my $nc = $next.chars;
+            if $nc > $max-line-length {
+                say "FATAL:  Line length too long ($nc), must be <= \$max-line-length ($max-line-length)";
+                say "line:   '$next'";
+                die "length: $nc";
+            }
         }
-    }
 
         if $next.chars + $line.chars <= $max-line-length {
             $line ~= $next;
@@ -383,8 +386,9 @@ multi write-paragraph(IO::Handle:D $fh, Str @Words, UInt :$max-line-length = 78,
             next;
         }
 
-        # we're done here
-        $fh.say: $line;
+        # we're done with this line
+        @para.push: $line if $line;
+        #@para.push: $line;
         last;
     }
 
@@ -393,8 +397,9 @@ multi write-paragraph(IO::Handle:D $fh, Str @Words, UInt :$max-line-length = 78,
     $line = $pindent-spaces;
     $first-word = True;
     loop {
-        if !+@words {
-            $fh.say: $line;
+        if !@words.elems {
+            @para.push: $line if $line;
+            #@para.push: $line;
             last;
         }
 
@@ -402,40 +407,53 @@ multi write-paragraph(IO::Handle:D $fh, Str @Words, UInt :$max-line-length = 78,
         $next = ' ' ~ $next if !$first-word;
         $first-word = False;
 
+        # do a length check
+	{
+            my $nc = $next.chars;
+            if $nc > $max-line-length {
+                say "FATAL:  Line length too long ($nc), must be <= \$max-line-length ($max-line-length)";
+                say "line:   '$next'";
+                die "length: $nc";
+            }
+        }
+
         if $next.chars + $line.chars <= $max-line-length {
             $line ~= $next;
             shift @words;
             next;
         }
 
-        # we're done here
-        $fh.say: $line;
+        # we're done with this line
+        @para.push: $line if $line;
+        #@para.push: $line;
+
+        last if !@words.elems;
+
         # replenish the line
         $line = $pindent-spaces;
         $first-word = True;
     }
 
+    return @para;
+
 } # write-paragraph
 
 #------------------------------------------------------------------------------
 # Subroutine write-paragraph
-# Purpose : Wrap a list of words into a paragraph with a maximum line width (default: 78) and updates the input list with the results
-# Params  : List of words, max line length, paragraph indent, first line indent, pre-text
-# Returns : Nothing (caution, this routine uses more memory than the output-to-file version)
-multi write-paragraph(Str @words, UInt :$max-line-length = 78,
-                      UInt :$para-indent = 0, UInt :$first-line-indent = 0,
+# Purpose : Wrap a list of words into a paragraph with a maximum line width (default: 78) and print it to the input file handle
+# Params  : Output file handle, list of words, max line length, paragraph indent, first line indent, pre-text
+# Returns : Nothing
+multi write-paragraph($fh, @text,
+                      UInt :$max-line-length = 78,
+                      UInt :$para-indent = 0,
+                      UInt :$first-line-indent = 0,
                       Str :$pre-text = '') is export(:write-paragraph2) {
 
-    use File::Temp;
-
-    # internal temp file name ($f) and its handle ($fh)
-    my ($f, $fh) = tempfile; # note temp files are opened rw
-
     # do the mods for the para text
-    write-paragraph($fh, @words, :$max-line-length, :$para-indent, :$first-line-indent, :$pre-text);
+    my @para = write-paragraph(@text, :$max-line-length, :$para-indent, :$first-line-indent, :$pre-text);
 
-    # assign the file contents to the incoming text
-    @words = (slurp $f).lines;
+    # write to the open file handle
+    $fh.say($_) for @para;
 }
 
 #------------------------------------------------------------------------------
@@ -449,6 +467,7 @@ sub normalize-string(Str:D $str is copy) returns Str is export(:normalize-string
     return $str;
 } # normalize-string
 
+=begin pod
 #------------------------------------------------------------------------------
 # Subroutine normalize-string-rw
 # Purpose : Trim a string and collapse multiple whitespace characters to single ones
@@ -458,6 +477,7 @@ sub normalize-string-rw(Str:D $str is rw) is export(:normalize-string-rw) {
     $str .= trim;
     $str ~~ s:g/ \s ** 2..*/ /;
 } # normalize-string-rw
+=end pod
 
 #------------------------------------------------------------------------------
 # Subroutine split-line
@@ -516,3 +536,138 @@ sub split-line-rw(Str:D $line is rw, Str:D $brk, UInt :$max-line-length = 0,
     return $line2;
 
 } # split-line-rw
+
+sub time-zone-offset-us(Str $tz, :$basic) {
+    # given a three-character string describing a US time zone,
+    # return the ISO 8601 extended (or basic) offset
+    my $offset = 'Z'; # UTC
+    given $tz {
+        # standard
+        when /:i ast / { $offset = '-04:00' }
+        when /:i est / { $offset = '-05:00' }
+        when /:i cst / { $offset = '-06:00' }
+        when /:i mst / { $offset = '-07:00' }
+        when /:i pst / { $offset = '-08:00' }
+        # daylight
+        when /:i adt / { $offset = '-03:00' }
+        when /:i edt / { $offset = '-04:00' }
+        when /:i cdt / { $offset = '-05:00' }
+        when /:i mdt / { $offset = '-06:00' }
+        when /:i pdt / { $offset = '-07:00' }
+    }
+
+    $offset ~~ s/\:00// if $basic;
+
+    return $offset;
+} # time-zone-offset-us
+
+sub time-stamp(:$set-time) is export(:time-stamp) {
+    my $dt; # DateTime object
+
+    my $fmt = { sprintf "%04d-%02d-%02dT%02d:%02d:%05.2fZ",
+                .year, .month, .day, .hour, .minute, .second};
+    my $fmt2 = { sprintf "%04d-%02d-%02dT%02d:%02d:%05.2f%+03d%02d",
+                .year, .month, .day, .hour, .minute, .second, .timezone div 3600, .timezone % 3600};
+
+    if $set-time {
+        $dt = DateTime.new($set-time, formatter => $fmt);
+    }
+    else {
+        $dt = DateTime.now(formatter => $fmt2);
+    }
+    return $dt.Str;
+}
+
+=begin pod
+sub time-stamp(Bool :$basic = True,
+               Bool :$day = True,
+               Bool :$local = True,
+               Str  :$set-time,
+               Str  :$tz,
+               Bool :$decorated = True) is export(:time-stamp) {
+
+    # default is extended UTC
+    my $tz-offset = 'Z';
+    if $tz {
+        $tz-offset = time-zone-offset-us($tz);
+        $tz-offset ~~ s:g/ \: // if $basic;
+    }
+
+    my $date;
+    if $day {
+	$date = DateTime.now(formatter => {
+	sprintf "%04d-%02d-%02d",
+	.year, .month, .day});
+        $date ~~ s:g/ \: // if $basic;
+    }
+    elsif $local {
+	$date = DateTime.now.local(formatter => {
+				    sprintf "%04d-%02d-%02dT%02d:%02d:%02d",
+				    .year, .month, .day, .hour, .minute, .second});
+        $date ~~ s:g/ <[:-]> // if $basic;
+    }
+    elsif $decorated {
+	$date = DateTime.now.utc(formatter => {
+	# bzr-friendly format (no ':' used)
+	sprintf "%04d%02d%02dT%02dh%02dm%02ds",
+	.year, .month, .day, .hour, .minute, .second});
+    }
+    else {
+        # ISO 8601 extended
+	$date = DateTime.now.utc(formatter => {
+				    sprintf "%04d-%02d-%02dT%02d:%02d:%02d",
+				    .year, .month, .day, .hour, .minute, .second});
+        $date ~~ s:g/ <[:-]> // if $basic;
+    }
+
+    $date ~= $tz-offset;
+
+    return $date;
+} # time-stamp
+=end pod
+
+sub find-dirs($dir) returns List is export(:find-dirs) {
+    my @dirs = ();
+    if !$dir.IO.d {
+	say "WARNING: '$dir' is not a directory.";
+	return @dirs;
+    }
+
+    say "Files in dir '$dir':" if $DEBUG;
+    for $dir.IO.dir -> $f {
+	# for now assume it's a prog (TODO docs show auto finding files, NOT so)
+	my $is-file = $f.f ?? True !! False;
+	if $is-file {
+	    say "  '$f' is a file...skipping" if $DEBUG;
+	    next;
+	}
+	else {
+	    say "  '$f' is a directory..." if $DEBUG;
+	    @dirs.push: $f;
+	}
+    }
+    return @dirs;
+} # find-dirs
+
+sub find-files($dir) returns List is export(:find-files) {
+    my @fils = ();
+    if !$dir.IO.d {
+	say "WARNING: '$dir' is not a directory.";
+	return @fils;
+    }
+
+    say "Files in dir '$dir':" if $DEBUG;
+    for $dir.IO.dir -> $f {
+	# for now assume it's a prog (TODO docs show auto finding files, NOT so)
+	my $is-file = $f.f ?? True !! False;
+	if $is-file {
+	    say "  '$f' is a file..." if $DEBUG;
+	    @fils.push: $f;
+	}
+	else {
+	    say "  '$f' is a directory...skipping" if $DEBUG;
+	    next;
+	}
+    }
+    return @fils;
+} # find-files
