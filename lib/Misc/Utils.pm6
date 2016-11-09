@@ -564,17 +564,24 @@ sub time-zone-offset-us(Str $tz, :$basic) {
 sub time-stamp(:$set-time) is export(:time-stamp) {
     my $dt; # DateTime object
 
-    my $fmt = { sprintf "%04d-%02d-%02dT%02d:%02d:%05.2fZ",
+    my $default-fmt = { sprintf "%04d-%02d-%02dT%02d:%02d:%05.2fZ",
                 .year, .month, .day, .hour, .minute, .second};
-    my $fmt2 = { sprintf "%04d-%02d-%02dT%02d:%02d:%05.2f%+03d%02d",
-                .year, .month, .day, .hour, .minute, .second, .timezone div 3600, .timezone % 3600};
 
     if $set-time {
-        $dt = DateTime.new($set-time, formatter => $fmt);
+        # this is strictly for testing
+        $dt = DateTime.new($set-time, formatter => $default-fmt);
     }
     else {
-        $dt = DateTime.now(formatter => $fmt2);
+         # this should stay the default format when more formats are added
+        $dt = DateTime.new(formatter => $default-fmt);
     }
+
+    =begin pod
+         my $fmt2 = { sprintf "%04d-%02d-%02dT%02d:%02d:%05.2f%+03d%02d",
+                .year, .month, .day, .hour, .minute, .second, .timezone div 3600, .timezone % 3600};
+        $dt = DateTime.now(formatter => $fmt2);
+    =end pod
+
     return $dt.Str;
 }
 
