@@ -2,6 +2,8 @@
 REQUIREMENTS FOR INITIAL, BETA RELEASE
 ======================================
 
+get datetime working right local versus zulu
+
 handle multi subs
 
 add the help text
