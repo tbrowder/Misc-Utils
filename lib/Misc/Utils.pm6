@@ -537,6 +537,49 @@ sub split-line-rw(Str:D $line is rw, Str:D $brk, UInt :$max-line-length = 0,
 
 } # split-line-rw
 
+sub time-zone-code(Int $tz-offset, Bool :$dst = False) {
+    # given a time zone offset in seconds, return either a
+    # three- or four-character string describing a
+    # US time zone or the one-character Naval Time code,
+    # including 'Z' for zero (UTC)
+
+    my $c;
+    # convert the time zone offset to hours
+    my $o = $tz-offset div 3600;
+    $o += 1 if $dst;
+    given $o {
+        # standard
+        when  +12 { $c = 'M'    }
+        when  +11 { $c = 'L'    }
+        when  +10 { $c = 'ChST' }
+        when   +9 { $c = 'I'    }
+        when   +8 { $c = 'H'    }
+        when   +7 { $c = 'G'    }
+        when   +6 { $c = 'F'    }
+        when   +5 { $c = 'E'    }
+        when   +4 { $c = 'D'    }
+        when   +3 { $c = 'C'    }
+        when   +2 { $c = 'B'    }
+        when   +1 { $c = 'A'    }
+        when    0 { $c = 'Z'    }
+        when   -1 { $c = 'N'    }
+        when   -2 { $c = 'O'    }
+        when   -3 { $c = 'P'    }
+        when   -4 { $c = 'AST'  }
+        when   -5 { $c = 'EST'  }
+        when   -6 { $c = 'CST'  }
+        when   -7 { $c = 'MST'  }
+        when   -8 { $c = 'PST'  }
+        when   -9 { $c = 'AHST' }
+        when  -10 { $c = 'HAST' }
+        when  -11 { $c = 'X'    }
+        when  -12 { $c = 'Y'    }
+    }
+
+    return $c;
+
+} # time-zone-code
+
 sub time-zone-offset-us(Str $tz, :$basic) {
     # given a three-character string describing a US time zone,
     # return the ISO 8601 extended (or basic) offset
@@ -561,29 +604,72 @@ sub time-zone-offset-us(Str $tz, :$basic) {
     return $offset;
 } # time-zone-offset-us
 
-sub time-stamp(:$set-time) is export(:time-stamp) {
+sub time-parse(Str:D $s) is export(:time-parse) {
+    # assumed to be in extended ISO 8601 format (with ':' and '-');
+
+=begin pod
+Date and time expressed according to ISO 8601:
+  Date:	                          2016-11-10
+  Combined date and time in UTC:  2016-11-10T16:31:40+00:00
+                                  2016-11-10T16:31:40Z
+                                  20161110T163140Z
+  Week:	                          2016-W45
+  Date with week number:	  2016-W45-4
+  Date without year:	          --11-10
+  Ordinal date:	                  2016-315
+=end pod
+    # just a simple test for now:
+    if $s !~~ / <[:-]>+ / {
+        die "FATAL:  Time string '$s' is not in ISO 8601 extended format";
+    }
+
+    # separate date and time parts
+
+
+} # time-parse
+
+sub time-stamp(:$set-time, :$code, :$utc, Int :$round = -1) returns Str is export(:time-stamp) {
     my $dt; # DateTime object
+    if $set-time {
+        $dt = DateTime.new($set-time);
+    }
+    else {
+        $dt = DateTime.now;
+    }
+
+    my $dts;
+
+    if $utc {
+        $dt .= utc;
+    }
+    elsif $code {
+        my $tzo = $dt.timezone; # signed: ssss OR -ssss
+        my $tcode = time-zone-code($tzo);
+        $dt .= local;
+        $dts = $dt.Str;
+        $dts ~~ s/<[-+]> \d\d\:\d\d $/\-$tcode/;
+    }
 
     my $default-fmt = { sprintf "%04d-%02d-%02dT%02d:%02d:%05.2fZ",
                 .year, .month, .day, .hour, .minute, .second};
+    my $fmt2 = { sprintf "%04d-%02d-%02dT%02d:%02d:%05.2f%+03d%02d",
+                .year, .month, .day, .hour, .minute, .second,
+                .timezone div 3600, .timezone % 3600};
 
-    if $set-time {
-        # this is strictly for testing
-        $dt = DateTime.new($set-time, formatter => $default-fmt);
+    if $round >= 0 {
+        # need string format
+        $dts = $dt.Str if !$dts;
+        #$dts ~~
+    }
+
+    if $dts {
+        return $dts;
     }
     else {
-         # this should stay the default format when more formats are added
-        $dt = DateTime.new(formatter => $default-fmt);
+        return $dt.Str;
     }
 
-    =begin pod
-         my $fmt2 = { sprintf "%04d-%02d-%02dT%02d:%02d:%05.2f%+03d%02d",
-                .year, .month, .day, .hour, .minute, .second, .timezone div 3600, .timezone % 3600};
-        $dt = DateTime.now(formatter => $fmt2);
-    =end pod
-
-    return $dt.Str;
-}
+} # time-stamp
 
 =begin pod
 sub time-stamp(Bool :$basic = True,
