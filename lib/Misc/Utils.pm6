@@ -659,7 +659,13 @@ sub time-stamp(:$set-time, :$code, :$utc, Int :$round = -1) returns Str is expor
     if $round >= 0 {
         # need string format
         $dts = $dt.Str if !$dts;
-        #$dts ~~
+        # need seconds 
+        if $dts ~~ / \: (\d\d\.\d+) / {
+            my $sec = +$0;
+            say "DEBUG: seconds = '$sec'";
+            my $dec = $$$$
+            my $round-sec = sprintf "%
+        }
     }
 
     if $dts {
