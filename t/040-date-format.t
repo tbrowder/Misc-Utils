@@ -59,6 +59,7 @@ is $dt, $exp;
 {
     # round seconds to X places
     $dt = time-stamp(:set-time($tt), :round(2));
+    say "DEBUG: \$dt = '$dt'";
     $exp = '2015-12-11T13:41:10.56-06:00';
     is $dt, $exp;
 }
