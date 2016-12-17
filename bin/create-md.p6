@@ -109,6 +109,7 @@ my $bindir = $bdir;
 my %kw = [
     # subroutines
     'Subroutine' => '###',
+    'Method'     => '###',
     'Purpose'    => '-',
     'Params'     => '-',
     'Returns'    => '-',
