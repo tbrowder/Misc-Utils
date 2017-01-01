@@ -4,6 +4,8 @@ split out this info to the new modules:
 REQUIREMENTS FOR INITIAL, BETA RELEASE
 ======================================
 
+add copyright to all READMEs
+
 get datetime working right local versus zulu
 
 handle multi subs
