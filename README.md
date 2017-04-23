@@ -1,7 +1,6 @@
 # Misc::Utils
 
-[![Build Status](https://travis-ci.org/tbrowder/Misc-Utils-Perl6.svg?branch=master)]
-  (https://travis-ci.org/tbrowder/Misc-Utils-Perl6)
+[![Build Status](https://travis-ci.org/tbrowder/Misc-Utils-Perl6.svg?branch=master)](https://travis-ci.org/tbrowder/Misc-Utils-Perl6)
 
 Being a lazy programmer, I refactor chunks of code I find useful into
 a module; whence comes this collection of Perl 6 subroutines I have
