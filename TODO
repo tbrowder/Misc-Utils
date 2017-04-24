@@ -36,13 +36,6 @@ allow multi-line text following a keyword
 
 use DateTime::Math for date functions
 
-use Perl 6 built-in routines :base(str) and base(str) to simplify
-  number base conversions
-
-make length args to base conversions named params
-
-add named param for upper case to base conversions
-
 ------------------------------------------
 DONE:
 ------------------------------------------
